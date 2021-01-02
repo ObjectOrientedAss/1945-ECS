@@ -1,0 +1,3 @@
+C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj/build/CMakeFiles/SDLWindowPrj.dir
+C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj/build/CMakeFiles/ZERO_CHECK.dir

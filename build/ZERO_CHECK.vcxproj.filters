@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\build\CMakeFiles\00c5020279752be1859cfef35d7e9dbb\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{82AB23F2-D79F-3EC3-B7E8-BE9C3BE4DF62}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

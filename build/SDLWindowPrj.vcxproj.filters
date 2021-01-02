@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\src\aiv-vector.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\src\behaviours.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\src\core_engine.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\src\ecs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\src\game.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\src\graphics_engine.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\src\main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\src\scenes_engine.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\src\time.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\src\vec2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\include\aiv-vector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\include\behaviours.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\include\color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\include\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\include\core_engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\include\ecs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\include\game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\include\graphics_engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\include\scenes_engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\include\time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\include\vec2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Danno Critico\Downloads\sdl-blank-prj\sdl-blank-prj\CMakelists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{BFEE6F63-5FE2-3839-A58C-3D26419A7B6F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{505FD1EB-F450-3DA6-9376-139060A3DBA1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
