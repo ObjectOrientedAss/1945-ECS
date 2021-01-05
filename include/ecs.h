@@ -4,13 +4,21 @@
 #include "aiv-vector.h"
 #include "vec2.h"
 #include "graphics_engine.h"
+#include "audio_engine.h"
+
+enum c_layer
+{
+    PLAYER_COLLISION_LAYER = 0x00000001,
+    ENEMY_COLLISION_LAYER = 0x00000002,
+    PLAYERBULLET_COLLISION_LAYER = 0x00000004,
+    ENEMYBULLET_COLLISION_LAYER = 0x00000008
+};
+typedef enum c_layer CollisionLayer;
 
 enum c_type
 {
     //------DATA SYSTEMS------//
-
-    TransformC = -2,
-    DamageC,
+    TransformC = -1,
 
     //^^^^^^DATA SYSTEMS^^^^^^//
 
@@ -18,32 +26,41 @@ enum c_type
 
     //------ECS  SYSTEMS------//
 
+    TimedBehaviourC,
+    SpawnC,
     InputC,
+    ShootC,
     ButtonC,
     MovementC,
     PhysicsC,
     HealthC,
     AnimatorC,
     SoundC,
+    FadeC,
+    AudioC,
     RenderC,
 
     //^^^^^^ECS  SYSTEMS^^^^^^//
     
-    Last
+    c_type_last
 };
 typedef enum c_type ComponentType;
 
-//ALL EXISTING COMPONENTS:
 enum e_type
 {
+    Background,
     Button,
     Player,
     Enemy,
     PlayerBullet,
-    EnemyBullet
+    EnemyBullet,
+    Particle,
+    SceneManager,
+    e_type_last
 };
 typedef enum e_type EntityType;
 
+//ALL EXISTING COMPONENTS:
 struct EntityComponentSystem
 {
     aiv_vector *entitiesToDestroy;   //add an existing entity here when it is marked to be destroyed, remove it when it is destroyed
@@ -86,6 +103,21 @@ typedef struct
     boolean shoot;
 } InputComponent;
 
+typedef struct
+{
+    double shootCooldown;
+    double shootCooldownElapsed;
+    EntityType bulletType;
+} ShootComponent;
+
+typedef struct
+{
+    int currentRepetitions;
+    int repetitions;
+    double time;
+    double elapsedTime;
+} TimedBehaviourComponent;
+
 typedef struct 
 {
     boolean isHovering;                              //set it to true when Hover Start is called
@@ -104,19 +136,24 @@ typedef struct
 //PHYSICS COMPONENT BEHAVIOUR: should check if the entity is colliding with another entity if it has the same component, and if that's so, trigger the collision on both
 typedef struct
 {
-    uint collisionBitmask; //with who can this component collide?
-    uint componentBitmask; //which bit do this component occupy?
-    float colliderRadius;  //
+    CollisionLayer layersBitmask; //with who can this component collide?
+    CollisionLayer selfLayer; //which bit do this component occupy?
+    float colliderRadius;  //the collision radius of this component
+    float collisionsBlockTime; //the time that must pass before this component will be able to collide again
+    float collisionsBlockTimeElapsed; //the time passed since the last collision
     void (*Collide)(struct Component *selfComponent, struct Component *otherComponent);
-    boolean hasCollided;   //has this collider collided in this frame?
+    boolean canCollide;    //has this collider collided in this frame?
 } PhysicsComponent;
 
 //HEALTH COMPONENT BEHAVIOUR: should check if the current health of the entity is <= 0 and trigger death if it happens
 typedef struct
 {
+    int maxLives;
+    int currentLives;
     float currentHealth;
     float maxHealth;
     void (*ChangeHealth)(void *selfComponent, float amount);
+    void (*Die)(struct Component* selfComponent, struct Game* game);
 } HealthComponent;
 
 //ANIMATOR COMPONENT BEHAVIOUR: should set and update a current animation to change the sprite rendered by the RenderComponent
@@ -127,8 +164,27 @@ typedef struct
     struct GFXEngine* engine;
     struct SpriteSheet currentAnimation;
     int currentFrameIndex;
-    void (*SetAnimation)(struct Component *selfComponent, AnimationType type);
+    void (*SetAnimation)(struct Component *selfComponent, AnimationType type, float frameDuration);
 } AnimatorComponent;
+
+typedef struct
+{
+    int startingAlpha;
+    int currentAlpha;
+    float fadeDuration;
+    float fadeDurationElapsed;
+    float fadeSpeed;
+} FadeComponent;
+
+typedef struct
+{
+    Mix_Chunk *audio_wav;
+    Mix_Music *audio_mp3;
+    const char *path;
+    int loops;
+    AudioExtension audioExtension;
+    boolean __is_playing;
+} AudioComponent;
 
 //RENDER COMPONENT BEHAVIOUR: should render the entity sprite
 typedef struct
@@ -142,11 +198,6 @@ typedef struct
 //-----DATA SYSTEMS-----//
 /*All the components of this category have a negative index in the ComponentType enum, and are never updated by the ECS.
 They don't need to have a behaviour, but if you want to use it for any reason, remember to fill it or they will fire a nullptr*/
-
-typedef struct
-{
-    float damage;
-} DamageComponent;
 
 typedef struct
 {
@@ -173,5 +224,7 @@ void AddToSystems(struct Component *component);
 void RemoveFromSystems(struct Component *component);
 void RegisterEntity(struct Entity *entity);
 void UnregisterEntity(struct Entity *entity);
+void SetEntityActiveStatus(struct Entity* entity, boolean active);
+void SetComponentActiveStatus(struct Component* component, boolean active);
 
 #endif //ECS_H

@@ -59,27 +59,27 @@
 			[
 				{
 					"backtrace" : 3,
-					"path" : "C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj/cmake/sdl2/include"
+					"path" : "C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj/cmake/sdl2/include"
 				},
 				{
 					"backtrace" : 3,
-					"path" : "C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj/cmake/sdl2_image/include"
+					"path" : "C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj/cmake/sdl2_image/include"
 				},
 				{
 					"backtrace" : 3,
-					"path" : "C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj/cmake/sdl2_ttf/include"
+					"path" : "C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj/cmake/sdl2_ttf/include"
 				},
 				{
 					"backtrace" : 3,
-					"path" : "C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj/cmake/sdl2_mixer/include"
+					"path" : "C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj/cmake/sdl2_mixer/include"
 				},
 				{
 					"backtrace" : 3,
-					"path" : "C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj/include"
+					"path" : "C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj/include"
 				},
 				{
 					"backtrace" : 3,
-					"path" : "C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj/include/components"
+					"path" : "C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj/include/components"
 				}
 			],
 			"language" : "C",
@@ -94,7 +94,10 @@
 				6,
 				7,
 				8,
-				9
+				9,
+				10,
+				11,
+				12
 			]
 		}
 	],
@@ -166,16 +169,16 @@
 				6,
 				7,
 				8,
-				9
+				9,
+				10,
+				11,
+				12
 			]
 		},
 		{
 			"name" : "Header Files",
 			"sourceIndexes" : 
 			[
-				10,
-				11,
-				12,
 				13,
 				14,
 				15,
@@ -183,7 +186,13 @@
 				17,
 				18,
 				19,
-				20
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26
 			]
 		}
 	],
@@ -193,6 +202,12 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "src/aiv-vector.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/audio_engine.c",
 			"sourceGroupIndex" : 0
 		},
 		{
@@ -234,6 +249,18 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
+			"path" : "src/pools_engine.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/queue.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
 			"path" : "src/scenes_engine.c",
 			"sourceGroupIndex" : 0
 		},
@@ -252,6 +279,11 @@
 		{
 			"backtrace" : 1,
 			"path" : "include/aiv-vector.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/audio_engine.h",
 			"sourceGroupIndex" : 1
 		},
 		{
@@ -287,6 +319,16 @@
 		{
 			"backtrace" : 1,
 			"path" : "include/graphics_engine.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/pools_engine.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/queue.h",
 			"sourceGroupIndex" : 1
 		},
 		{

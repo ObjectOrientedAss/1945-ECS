@@ -4,12 +4,16 @@
 #include "graphics_engine.h"
 #include "time.h"
 #include "scenes_engine.h"
+#include "pools_engine.h"
+#include "audio_engine.h"
 
 struct Engine
 {
     Time* time;
     struct GFXEngine* GfxEngine;
     struct ScenesEngine* scenesEngine;
+    struct PoolsEngine* poolsEngine;
+    struct AudioEngine* audioEngine;
     struct Scene* currentScene;
 };
 

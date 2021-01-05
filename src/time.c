@@ -13,6 +13,7 @@ void TimeUpdate(Time *time)
     time->_lastCount = time->_currentCount;
     time->_currentCount = SDL_GetPerformanceCounter();
     time->_frequency = (double)SDL_GetPerformanceFrequency();
-    time->deltaTime = (float)((time->_currentCount - time->_lastCount) * 1000 / time->_frequency);
-    time->fps = (int)(1.f / time->deltaTime);
+    time->deltaTime = (double)((time->_currentCount - time->_lastCount) * 1000 / time->_frequency);
+    time->deltaTimeInSeconds = time->deltaTime * 0.001; //suka!
+    time->fps = (int)(1.0 / time->deltaTime);
 }

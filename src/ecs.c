@@ -8,9 +8,9 @@ struct EntityComponentSystem *ECSInit()
     ECS->entities = aiv_vector_new_with_cap(10);
     ECS->entitiesToDestroy = aiv_vector_new_with_cap(10);
     ECS->componentsToDestroy = aiv_vector_new_with_cap(10);
-    ECS->systems = aiv_vector_new_with_cap((uint)Last);
+    ECS->systems = aiv_vector_new_with_cap((uint)c_type_last);
 
-    for (int i = 0; i < (int)Last; i++)
+    for (int i = 0; i < (int)c_type_last; i++)
     {
         aiv_vector *currentSystem = aiv_vector_new_with_cap(1);
         aiv_vector_add(ECS->systems, currentSystem);
@@ -27,16 +27,16 @@ struct EntityComponentSystem *ECSReset(struct EntityComponentSystem *ECS)
 
 void DestroyECS(struct EntityComponentSystem *ECS)
 {
-    DestroyEntities(ECS->entities);
-    aiv_vector_destroy(ECS->entities);
+    DestroyComponents(ECS->componentsToDestroy);
+    aiv_vector_destroy(ECS->componentsToDestroy);
 
     DestroyEntities(ECS->entitiesToDestroy);
     aiv_vector_destroy(ECS->entitiesToDestroy);
 
-    DestroyComponents(ECS->componentsToDestroy);
-    aiv_vector_destroy(ECS->componentsToDestroy);
+    DestroyEntities(ECS->entities);
+    aiv_vector_destroy(ECS->entities);
 
-    for (int i = 0; i < (int)Last; i++)
+    for (int i = 0; i < (int)c_type_last; i++)
     {
         aiv_vector_destroy(aiv_vector_at(ECS->systems, i));
     }
@@ -58,12 +58,29 @@ struct Entity *CreateEntity(EntityType type, boolean activateImmediately, struct
     return entity;
 }
 
+//ADDS THE SPECIFIED COMPONENT TO THE ENTITY.
 struct Component *AddComponent(struct Entity *entity, ComponentType componentType, void (*behaviour)(struct Component *selfComponent, struct Game *game))
 {
     struct Component *component = (struct Component *)calloc(1, sizeof(struct Component));
 
     switch (componentType)
     {
+    case TimedBehaviourC:
+        TimedBehaviourComponent *timedBehaviourComponent = (TimedBehaviourComponent *)calloc(1, sizeof(TimedBehaviourComponent));
+        if (timedBehaviourComponent == NULL)
+            break;
+        component->type = TimedBehaviourC;
+        component->data = timedBehaviourComponent;
+        break;
+
+    case ShootC:
+        ShootComponent *shootComponent = (ShootComponent *)calloc(1, sizeof(ShootComponent));
+        if (shootComponent == NULL)
+            break;
+        component->type = ShootC;
+        component->data = shootComponent;
+        break;
+
     case TransformC:
         TransformComponent *transformComponent = (TransformComponent *)calloc(1, sizeof(TransformComponent));
         if (transformComponent == NULL)
@@ -78,6 +95,14 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
             break;
         component->type = InputC;
         component->data = inputComponent;
+        break;
+
+    case ButtonC:
+        ButtonComponent *buttonComponent = (ButtonComponent *)calloc(1, sizeof(ButtonComponent));
+        if (buttonComponent == NULL)
+            break;
+        component->type = ButtonC;
+        component->data = buttonComponent;
         break;
 
     case MovementC:
@@ -111,7 +136,15 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         component->type = AnimatorC;
         component->data = animatorComponent;
         break;
-        
+
+    case FadeC:
+        FadeComponent *fadeComponent = (FadeComponent *)calloc(1, sizeof(FadeComponent));
+        if (fadeComponent == NULL)
+            break;
+        component->type = FadeC;
+        component->data = fadeComponent;
+        break;
+
     case RenderC:
         RenderComponent *renderComponent = (RenderComponent *)calloc(1, sizeof(RenderComponent));
         if (renderComponent == NULL)
@@ -123,12 +156,12 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
 
     if (component->data != NULL)
     {
+        component->owner = entity;
         component->markedToDestroy = false;
         component->active = true;
-        component->owner = entity;
         component->behaviour = behaviour;
         aiv_vector_add(entity->components, component);
-        printf("\nEntity Components Vector---\ncomponent %d added at position %d", (int)component->type, aiv_vector_size(entity->components) - 1);
+        //printf("\nEntity Components Vector---\ncomponent %d added at position %d", (int)component->type, aiv_vector_size(entity->components) - 1);
         AddToSystems(component);
         return component;
     }
@@ -141,11 +174,11 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
 //RETURNS NULL IF THE COMPONENT IS NOT FOUND.
 struct Component *GetComponent(struct Entity *entity, ComponentType type)
 {
-    printf("\n---Looking for %d component type", type);
+    //printf("\n---Looking for %d component type", type);
     for (uint i = 0; i < entity->components->__count; i++)
     {
         struct Component *c = aiv_vector_at(entity->components, i);
-        printf("\nComponent %d type is %d", i, c->type);
+        //printf("\nComponent %d type is %d", i, c->type);
         if (c->type == type)
             return c;
     }
@@ -193,10 +226,8 @@ void DestroyComponent(struct Component *component)
     //THIS IS TOTALLY UNOPTIMIZED! REMOVE ALL AT ONCE!
     RemoveFromSystems(component);
     //---
-
+    //printf("\n%d", component->owner->__entityIndex);
     free(component->data);
-    component->behaviour = NULL;
-    component->owner = NULL;
     free(component);
 }
 
@@ -210,7 +241,6 @@ void DestroyEntity(struct Entity *entity)
         DestroyComponent(component);
     }
     aiv_vector_destroy(entity->components);
-    entity->ECS = NULL;
     free(entity);
 }
 
@@ -227,7 +257,7 @@ void DestroyEntities(aiv_vector *entitiesContainer)
 {
     for (int i = entitiesContainer->__count - 1; i >= 0; i--)
     {
-        struct Entity *entity = aiv_vector_remove_at(entitiesContainer, i);
+        struct Entity *entity = aiv_vector_at(entitiesContainer, i);
         DestroyEntity(entity);
     }
 }
@@ -239,7 +269,7 @@ void AddToSystems(struct Component *component)
         aiv_vector *system = aiv_vector_at(component->owner->ECS->systems, (uint)component->type);
         component->__systemIndex = aiv_vector_size(system);
         aiv_vector_add(system, component);
-        printf("\n||| Component of type %d has been added to the relative ECS system |||", component->type);
+        //printf("\n||| Component of type %d has been added to the relative ECS system |||", component->type);
     }
 }
 
@@ -272,4 +302,16 @@ void UnregisterEntity(struct Entity *entity)
         struct Entity *currEnt = aiv_vector_at(entities, i);
         currEnt->__entityIndex--;
     }
+}
+
+void SetEntityActiveStatus(struct Entity *entity, boolean active)
+{
+    entity->active = active;
+    //printf("Entity %d active status: %d", entity->type, active);
+}
+
+void SetComponentActiveStatus(struct Component *component, boolean active)
+{
+    component->active = active;
+    //printf("Component %d active status: %d", component->type, active);
 }

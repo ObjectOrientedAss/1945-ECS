@@ -8,7 +8,8 @@ typedef struct
     double _frequency;
     Uint64 _currentCount;
     Uint64 _lastCount;
-    float deltaTime;
+    double deltaTime;
+    double deltaTimeInSeconds;
     int fps;
 } Time;
 

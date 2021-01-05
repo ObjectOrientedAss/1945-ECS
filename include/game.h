@@ -5,6 +5,7 @@
 #include "core_engine.h"
 #include "ecs.h"
 #include "behaviours.h"
+#include <stdlib.h>
 
 struct Engine;
 struct EntityComponentSystem;
@@ -24,5 +25,8 @@ void QuitGame(struct Game* game);
 void GameLoop(struct Game* game);
 boolean UpdateSDL(struct Game* game);
 void UpdateECS(struct Game* game);
+int GetRandomInt(int max);
+float GetRandomFloat(float max);
+float GetRandomFloatBetween(float max, float min);
 
 #endif //GAME_H

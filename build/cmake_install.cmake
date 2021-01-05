@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj
+# Install script for directory: C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

@@ -4,7 +4,7 @@ struct GFXEngine *StartGFXEngine()
 {
     struct GFXEngine *engine = calloc(1, sizeof(struct GFXEngine));
     SDL_Init(SDL_INIT_VIDEO);
-    
+
     int flags = IMG_INIT_JPG | IMG_INIT_PNG;
     int sdl_init_flags = IMG_Init(flags);
 
@@ -60,11 +60,12 @@ void StopGFXEngine(struct GFXEngine *engine)
         SDL_DestroyTexture(s->texture);
         free(s);
     }
-    aiv_vector_destroy(engine->spriteSheets);
+    aiv_vector_destroy(engine->sprites);
 
     //quit SDL gfx
     SDL_DestroyRenderer(engine->renderer);
     SDL_DestroyWindow(engine->window);
+    free(engine);
 }
 
 struct Sprite *CreateSprite(char *path, SpriteType type, SDL_Renderer *renderer)
@@ -77,7 +78,7 @@ struct Sprite *CreateSprite(char *path, SpriteType type, SDL_Renderer *renderer)
     int h = 0;
     int w = 0;
     SDL_QueryTexture(sprite->texture, NULL, NULL, &h, &w);
-    printf("%d - %d\n", h, w);
+    //printf("%d - %d\n", h, w);
 
     originRect.w = h;
     originRect.h = w;
@@ -92,9 +93,9 @@ struct Sprite *CreateSprite(char *path, SpriteType type, SDL_Renderer *renderer)
 
     sprite->originRect = originRect;
     sprite->spriteRect = spriteRect;
-    printf("\n\nOR H: %d | OR W: %d | OR X: %d | OR Y: %d", sprite->originRect.h, sprite->originRect.w, sprite->originRect.x, sprite->originRect.y);
-    printf("\n\nSR H: %d | SR W: %d | SR X: %d | SR Y: %d", sprite->spriteRect.h, sprite->spriteRect.w, sprite->spriteRect.x, sprite->spriteRect.y);
-    printf("\n\nSPRITE TEXTURE %llu", sprite->texture);
+    // printf("\n\nOR H: %d | OR W: %d | OR X: %d | OR Y: %d", sprite->originRect.h, sprite->originRect.w, sprite->originRect.x, sprite->originRect.y);
+    // printf("\n\nSR H: %d | SR W: %d | SR X: %d | SR Y: %d", sprite->spriteRect.h, sprite->spriteRect.w, sprite->spriteRect.x, sprite->spriteRect.y);
+    // printf("\n\nSPRITE TEXTURE %llu", sprite->texture);
 
     return sprite;
 }
@@ -115,6 +116,10 @@ void LoadSprites(struct GFXEngine *engine)
     aiv_vector_add(engine->sprites, sprite);
     sprite = CreateSprite("resources/assets/player/bullet.png", PlayerBulletS, engine->renderer);
     aiv_vector_add(engine->sprites, sprite);
+    sprite = CreateSprite("resources/assets/ui/Title.png", TitleS, engine->renderer);
+    aiv_vector_add(engine->sprites, sprite);
+    sprite = CreateSprite("resources/assets/map/water-bg.png", WaterS, engine->renderer);
+    aiv_vector_add(engine->sprites, sprite);
 }
 
 struct SpriteSheet *CreateSpriteSheet(char *path, int frames, float baseFrameDuration, AnimationType type, SDL_Renderer *renderer)
@@ -123,12 +128,12 @@ struct SpriteSheet *CreateSpriteSheet(char *path, int frames, float baseFrameDur
     spriteSheet->frames = frames;
     spriteSheet->type = type;
     spriteSheet->baseFrameDuration = baseFrameDuration;
-    SDL_Surface *surface = IMG_Load(path);
-    spriteSheet->texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
+    SDL_Texture *texture = IMG_LoadTexture(renderer, path);
+    spriteSheet->texture = texture;
     int spriteSheetW;
     SDL_QueryTexture(spriteSheet->texture, NULL, NULL, &spriteSheetW, &spriteSheet->frameHeight);
     spriteSheet->frameWidth = spriteSheetW / spriteSheet->frames;
+    printf("Frames: %d, frameWidth: %d", spriteSheet->frames, spriteSheet->frameWidth);
     return spriteSheet;
 }
 
@@ -137,21 +142,21 @@ void LoadSpriteSheets(struct GFXEngine *engine)
     //CREATE THE SPRITESHEETS
     struct SpriteSheet *spriteSheet = NULL;
 
-    spriteSheet = CreateSpriteSheet("/resources/NotFound.png", 1, 0.1f, NullA, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/NotFound.png", 1, 0.1f, NullA, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
-    spriteSheet = CreateSpriteSheet("/resources/assets/enemy/enemy1_strip3.png", 3, 0.1f, Enemy1A, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy1_strip3.png", 3, 0.1f, Enemy1A, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
-    spriteSheet = CreateSpriteSheet("/resources/assets/enemy/enemy2_strip3.png", 3, 0.1f, Enemy2A, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy2_strip3.png", 3, 0.1f, Enemy2A, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
-    spriteSheet = CreateSpriteSheet("/resources/assets/enemy/enemy3_strip3.png", 3, 0.1f, Enemy3A, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy3_strip3.png", 3, 0.1f, Enemy3A, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
-    spriteSheet = CreateSpriteSheet("/resources/assets/enemy/enemy4_strip3.png", 3, 0.1f, Enemy4A, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy4_strip3.png", 3, 0.1f, Enemy4A, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
-    spriteSheet = CreateSpriteSheet("/resources/assets/enemy/explosion1_strip6.png", 6, 0.1f, EnemyExplosionA, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/enemy/explosion1_strip6.png", 6, 0.1f, EnemyExplosionA, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
-    spriteSheet = CreateSpriteSheet("/resources/assets/player/myplane_strip3.png", 3, 0.1f, PlayerA, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/player/myplane_strip3.png", 3, 0.3f, PlayerA, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
-    spriteSheet = CreateSpriteSheet("/resources/assets/player/explosion2_strip7.png", 7, 0.1f, PlayerExplosionA, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/player/explosion2_strip7.png", 7, 0.1f, PlayerExplosionA, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
 }
 

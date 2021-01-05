@@ -25,7 +25,9 @@ enum s_type
     QuitButtonS,
     EnemyBullet1S,
     EnemyBullet2S,
-    PlayerBulletS
+    PlayerBulletS,
+    TitleS,
+    WaterS
 };
 typedef enum s_type SpriteType;
 

@@ -42,21 +42,21 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ALL_BUILD-Debug-a921ee3fea088a395836.json",
+					"jsonFile" : "target-ALL_BUILD-Debug-6a2a16f84253cd6f102f.json",
 					"name" : "ALL_BUILD",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "SDLWindowPrj::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SDLWindowPrj-Debug-d803d56fa84f3fcccfd6.json",
+					"jsonFile" : "target-SDLWindowPrj-Debug-aecce282300a2ee55754.json",
 					"name" : "SDLWindowPrj",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ZERO_CHECK-Debug-f467a7487e247713511b.json",
+					"jsonFile" : "target-ZERO_CHECK-Debug-5766f8770814374f5ad7.json",
 					"name" : "ZERO_CHECK",
 					"projectIndex" : 0
 				}
@@ -103,21 +103,21 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ALL_BUILD-Release-a921ee3fea088a395836.json",
+					"jsonFile" : "target-ALL_BUILD-Release-6a2a16f84253cd6f102f.json",
 					"name" : "ALL_BUILD",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "SDLWindowPrj::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SDLWindowPrj-Release-cc77f144a0b42fc3ba55.json",
+					"jsonFile" : "target-SDLWindowPrj-Release-cd1c1a9a57a235734db5.json",
 					"name" : "SDLWindowPrj",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ZERO_CHECK-Release-f467a7487e247713511b.json",
+					"jsonFile" : "target-ZERO_CHECK-Release-5766f8770814374f5ad7.json",
 					"name" : "ZERO_CHECK",
 					"projectIndex" : 0
 				}
@@ -164,21 +164,21 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ALL_BUILD-MinSizeRel-a921ee3fea088a395836.json",
+					"jsonFile" : "target-ALL_BUILD-MinSizeRel-6a2a16f84253cd6f102f.json",
 					"name" : "ALL_BUILD",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "SDLWindowPrj::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SDLWindowPrj-MinSizeRel-9549df3b2957fed0d331.json",
+					"jsonFile" : "target-SDLWindowPrj-MinSizeRel-43a001ea62396b5c404e.json",
 					"name" : "SDLWindowPrj",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ZERO_CHECK-MinSizeRel-f467a7487e247713511b.json",
+					"jsonFile" : "target-ZERO_CHECK-MinSizeRel-5766f8770814374f5ad7.json",
 					"name" : "ZERO_CHECK",
 					"projectIndex" : 0
 				}
@@ -225,21 +225,21 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ALL_BUILD-RelWithDebInfo-a921ee3fea088a395836.json",
+					"jsonFile" : "target-ALL_BUILD-RelWithDebInfo-6a2a16f84253cd6f102f.json",
 					"name" : "ALL_BUILD",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "SDLWindowPrj::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SDLWindowPrj-RelWithDebInfo-72e03e17b69282866c40.json",
+					"jsonFile" : "target-SDLWindowPrj-RelWithDebInfo-9813c98015568406d702.json",
 					"name" : "SDLWindowPrj",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ZERO_CHECK-RelWithDebInfo-f467a7487e247713511b.json",
+					"jsonFile" : "target-ZERO_CHECK-RelWithDebInfo-5766f8770814374f5ad7.json",
 					"name" : "ZERO_CHECK",
 					"projectIndex" : 0
 				}
@@ -249,8 +249,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj/build",
-		"source" : "C:/Users/Danno Critico/Downloads/sdl-blank-prj/sdl-blank-prj"
+		"build" : "C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj/build",
+		"source" : "C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj"
 	},
 	"version" : 
 	{

@@ -12,6 +12,14 @@ struct Engine *StartEngine()
     if (engine->GfxEngine == NULL)
         return NULL;
 
+    engine->poolsEngine = StartPoolsEngine();
+    if(engine->poolsEngine == NULL)
+        return NULL;
+
+    engine->audioEngine = StartAudioEngine();
+    if(engine->audioEngine == NULL)
+        return NULL;
+
     engine->time = TimeInit();
     if (engine->time == NULL)
         return NULL;
@@ -31,5 +39,7 @@ void StopEngine(struct Engine *engine)
     free(engine->time);
     StopGFXEngine(engine->GfxEngine);
     DestroyScenesEngine(engine->scenesEngine);
+    DestroyPoolsEngine(engine->poolsEngine);
+    free(engine);
     SDL_Quit();
 }
