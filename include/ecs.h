@@ -27,7 +27,6 @@ enum c_type
     //------ECS  SYSTEMS------//
 
     TimedBehaviourC,
-    SpawnC,
     InputC,
     ShootC,
     ButtonC,
@@ -36,7 +35,6 @@ enum c_type
     HealthC,
     AnimatorC,
     SoundC,
-    FadeC,
     AudioC,
     RenderC,
 
@@ -55,6 +53,7 @@ enum e_type
     PlayerBullet,
     EnemyBullet,
     Particle,
+    AudioEmitter,
     SceneManager,
     e_type_last
 };
@@ -116,6 +115,7 @@ typedef struct
     int repetitions;
     double time;
     double elapsedTime;
+    aiv_vector* customArgs;
 } TimedBehaviourComponent;
 
 typedef struct 
@@ -169,21 +169,11 @@ typedef struct
 
 typedef struct
 {
-    int startingAlpha;
-    int currentAlpha;
-    float fadeDuration;
-    float fadeDurationElapsed;
-    float fadeSpeed;
-} FadeComponent;
-
-typedef struct
-{
-    Mix_Chunk *audio_wav;
-    Mix_Music *audio_mp3;
-    const char *path;
+    struct AudioEngine* engine;
+    struct Audio audio;
     int loops;
-    AudioExtension audioExtension;
-    boolean __is_playing;
+    void (*SetAudio)(struct Component* selfComponent, AudioType type, int loops);
+    boolean isPlaying;
 } AudioComponent;
 
 //RENDER COMPONENT BEHAVIOUR: should render the entity sprite

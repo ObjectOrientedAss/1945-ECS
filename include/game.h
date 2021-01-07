@@ -26,6 +26,7 @@ void GameLoop(struct Game* game);
 boolean UpdateSDL(struct Game* game);
 void UpdateECS(struct Game* game);
 int GetRandomInt(int max);
+int GetRandomIntBetween(int max, int min);
 float GetRandomFloat(float max);
 float GetRandomFloatBetween(float max, float min);
 

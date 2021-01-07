@@ -7,7 +7,7 @@
 
 enum a_type
 {
-    NullA,
+    NullAnimation,
     Enemy1A,
     Enemy2A,
     Enemy3A,
@@ -20,14 +20,17 @@ typedef enum a_type AnimationType;
 
 enum s_type
 {
-    NullS,
+    NullSprite,
     StartButtonS,
     QuitButtonS,
     EnemyBullet1S,
     EnemyBullet2S,
     PlayerBulletS,
     TitleS,
-    WaterS
+    WaterS,
+    Island1S,
+    Island2S,
+    Island3S
 };
 typedef enum s_type SpriteType;
 

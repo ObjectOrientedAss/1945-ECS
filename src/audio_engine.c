@@ -16,42 +16,65 @@ struct AudioEngine *StartAudioEngine()
         return NULL;
     }
 
-    //load chunks
-    LoadChunks(engine);
-    //load musics
-    LoadMusics(engine);
+    engine->sounds = aiv_vector_new_with_cap(3);
+
+    //load sounds
+    LoadSounds(engine);
     return engine;
 }
 
-void StopAudioEngine(struct AudioEngine* engine, AudioType type)
+void StopAudioEngine(struct AudioEngine *engine)
 {
-    for (int i = aiv_vector_size(engine->chunks) - 1; i >= 0; i--)
+    for (int i = aiv_vector_size(engine->sounds) - 1; i >= 0; i--)
     {
-        Mix_Chunk* c = aiv_vector_remove_at(engine->chunks, i);
-        Mix_FreeChunk(c);    
+        struct Audio *audio = aiv_vector_remove_at(engine->sounds, i);
+        switch (audio->audioExtension)
+        {
+        case WAV:
+            Mix_FreeChunk(audio->data);
+            break;
+        case MP3:
+            Mix_FreeMusic(audio->data);
+            break;
+        }
+        free(audio);
     }
-    aiv_vector_destroy(engine->chunks);
+    aiv_vector_destroy(engine->sounds);
     
-    for (int i = aiv_vector_size(engine->musics) - 1; i >= 0; i--)
-    {
-        Mix_Music* m = aiv_vector_remove_at(engine->musics, i);
-        Mix_FreeMusic(m);    
-    }
-    aiv_vector_destroy(engine->musics);
     free(engine);
 }
 
-void LoadChunks(struct AudioEngine *engine)
+void LoadSounds(struct AudioEngine *engine)
 {
-
+    struct Audio *sound = NULL;
+    sound = LoadSound("resources/assets/audio/background.mp3", MP3);
+    aiv_vector_add(engine->sounds, sound);
+    sound = LoadSound("resources/assets/audio/explosion_01.mp3", MP3);
+    aiv_vector_add(engine->sounds, sound);
+    sound = LoadSound("resources/assets/audio/explosion_02.mp3", MP3);
+    aiv_vector_add(engine->sounds, sound);
 }
 
-void LoadMusics(struct AudioEngine *engine)
+struct Audio *LoadSound(char *path, AudioExtension audioExtension)
 {
+    struct Audio *sound = (struct Audio *)calloc(1, sizeof(struct Audio));
+    sound->audioExtension = audioExtension;
+    switch (sound->audioExtension)
+    {
+    case WAV:
+        sound->data = (Mix_Chunk *)Mix_LoadWAV(path);
+        break;
+    case MP3:
+        sound->data = (Mix_Music *)Mix_LoadMUS(path);
+        break;
+    }
 
+    return sound;
 }
 
-void LoadSound(struct AudioEngine *engine, AudioType audioType)
+struct Audio GetSound(struct AudioEngine *engine, AudioType type)
 {
-
+    struct Audio *sound = aiv_vector_at(engine->sounds, (int)type);
+    struct Audio s = *sound;
+    return s;
 }

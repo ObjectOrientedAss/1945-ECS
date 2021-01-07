@@ -15,22 +15,27 @@ typedef enum audio_extension AudioExtension;
 
 enum t_audio
 {
-    Music,
-    Explosion1,
-    Explosion2
+    BackgroundMusic,
+    Explosion1SFX,
+    Explosion2SFX
 };
 typedef enum t_audio AudioType;
 
+struct Audio
+{
+    void* data;                     //chunk or music pointer
+    AudioExtension audioExtension;  //the audio extension, MP3 or WAV
+};
+
 struct AudioEngine
 {
-    aiv_vector* chunks;
-    aiv_vector* musics;
+    aiv_vector* sounds;            //the vector containing all the sound effects
 };
 
 struct AudioEngine* StartAudioEngine();
-void StopAudioEngine();
-void LoadChunks(struct AudioEngine* engine);
-void LoadMusics(struct AudioEngine* engine);
-void LoadSound(struct AudioEngine* engine, AudioType audioType);
+void StopAudioEngine(struct AudioEngine* engine);
+void LoadSounds(struct AudioEngine* engine);
+struct Audio *LoadSound(char *path, AudioExtension audioExtension);
+struct Audio GetSound(struct AudioEngine *engine, AudioType type);
 
 #endif //AUDIO_ENGINE_H

@@ -104,7 +104,7 @@ void LoadSprites(struct GFXEngine *engine)
 {
     struct Sprite *sprite = NULL;
     //and now my big mascotte fella...
-    sprite = CreateSprite("resources/assets/NotFound.png", NullS, engine->renderer);
+    sprite = CreateSprite("resources/assets/NotFound.png", NullSprite, engine->renderer);
     aiv_vector_add(engine->sprites, sprite);
     sprite = CreateSprite("resources/assets/StartButton.png", StartButtonS, engine->renderer);
     aiv_vector_add(engine->sprites, sprite);
@@ -119,6 +119,12 @@ void LoadSprites(struct GFXEngine *engine)
     sprite = CreateSprite("resources/assets/ui/Title.png", TitleS, engine->renderer);
     aiv_vector_add(engine->sprites, sprite);
     sprite = CreateSprite("resources/assets/map/water-bg.png", WaterS, engine->renderer);
+    aiv_vector_add(engine->sprites, sprite);
+    sprite = CreateSprite("resources/assets/map/island1.png", Island1S, engine->renderer);
+    aiv_vector_add(engine->sprites, sprite);
+    sprite = CreateSprite("resources/assets/map/island2.png", Island2S, engine->renderer);
+    aiv_vector_add(engine->sprites, sprite);
+    sprite = CreateSprite("resources/assets/map/island3.png", Island3S, engine->renderer);
     aiv_vector_add(engine->sprites, sprite);
 }
 
@@ -142,7 +148,7 @@ void LoadSpriteSheets(struct GFXEngine *engine)
     //CREATE THE SPRITESHEETS
     struct SpriteSheet *spriteSheet = NULL;
 
-    spriteSheet = CreateSpriteSheet("resources/assets/NotFound.png", 1, 0.1f, NullA, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/NotFound.png", 1, 0.1f, NullAnimation, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
     spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy1_strip3.png", 3, 0.1f, Enemy1A, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
@@ -165,7 +171,7 @@ struct Sprite GetSprite(struct GFXEngine *engine, SpriteType type)
 {
     struct Sprite *sprite = aiv_vector_at(engine->sprites, (int)type);
     if (sprite == NULL)
-        sprite = aiv_vector_at(engine->sprites, NullS);
+        sprite = aiv_vector_at(engine->sprites, NullSprite);
     struct Sprite s = *sprite;
     return s;
 }
@@ -175,7 +181,7 @@ struct SpriteSheet GetAnimation(struct GFXEngine *engine, AnimationType type)
 {
     struct SpriteSheet *spriteSheet = aiv_vector_at(engine->spriteSheets, (int)type);
     if (spriteSheet == NULL)
-        spriteSheet = aiv_vector_at(engine->spriteSheets, NullA);
+        spriteSheet = aiv_vector_at(engine->spriteSheets, NullAnimation);
     struct SpriteSheet s = *spriteSheet;
     return s;
 }

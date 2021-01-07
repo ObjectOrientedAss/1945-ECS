@@ -38,6 +38,7 @@ void StopEngine(struct Engine *engine)
 {
     free(engine->time);
     StopGFXEngine(engine->GfxEngine);
+    StopAudioEngine(engine->audioEngine);
     DestroyScenesEngine(engine->scenesEngine);
     DestroyPoolsEngine(engine->poolsEngine);
     free(engine);

@@ -1,5 +1,6 @@
 #include "behaviours.h"
 #include "stdio.h"
+#include <math.h>
 
 void InputBehaviour(struct Component *selfComponent, struct Game *game)
 {
@@ -94,6 +95,16 @@ void PlayerMovementBehaviour(struct Component *selfComponent, struct Game *game)
 
     tc->position.x += movementComponent->velocity.x * movementComponent->speed * game->engine->time->deltaTime;
     tc->position.y += movementComponent->velocity.y * movementComponent->speed * game->engine->time->deltaTime;
+
+    if (tc->position.x < 0)
+        tc->position.x = 0;
+    else if (tc->position.x > game->engine->GfxEngine->windowWidth)
+        tc->position.x = game->engine->GfxEngine->windowWidth;
+
+    if (tc->position.y < 0)
+        tc->position.y = 0;
+    else if (tc->position.y > game->engine->GfxEngine->windowHeight)
+        tc->position.y = game->engine->GfxEngine->windowHeight;
 }
 
 void AutomatedMovementBehaviour(struct Component *selfComponent, struct Game *game)
@@ -105,11 +116,11 @@ void AutomatedMovementBehaviour(struct Component *selfComponent, struct Game *ga
     tc->position.x += movementComponent->velocity.x * movementComponent->speed * game->engine->time->deltaTime;
     tc->position.y += movementComponent->velocity.y * movementComponent->speed * game->engine->time->deltaTime;
 
-    if ((tc->position.y > game->engine->GfxEngine->windowHeight + 50 && movementComponent->velocity.y > 0) ||
-        (tc->position.y < 50 && movementComponent->velocity.y < 0))
+    if ((tc->position.y > game->engine->GfxEngine->windowHeight + 100 && movementComponent->velocity.y > 0) ||
+        (tc->position.y < -100 && movementComponent->velocity.y < 0))
     {
         SetEntityActiveStatus(selfComponent->owner, false);
-        printf("DISATTIVATA ENTITY NUMERO %d ALLE COORDINATE:    %f  |  %f", selfComponent->owner->__entityIndex, tc->position.x, tc->position.y);
+        //printf("DISATTIVATA ENTITY NUMERO %d ALLE COORDINATE:    %f  |  %f", selfComponent->owner->__entityIndex, tc->position.x, tc->position.y);
     }
 }
 
@@ -158,7 +169,7 @@ void PhysicsBehaviour(struct Component *selfComponent, struct Game *game)
             //if the distance is less than the two colliders radiuses combined, we are colliding on each other
             if (vec2_magn(&vDist) <= physicsComponent->colliderRadius + otherPhysicsComponent->colliderRadius)
             {
-                printf("\n\n---------     COLLISION HAPPENED BETWEEN %d AND %d!", selfComponent->owner->type, otherComponent->owner->type);
+                //printf("\n\n---------     COLLISION HAPPENED BETWEEN %d AND %d!", selfComponent->owner->type, otherComponent->owner->type);
                 //handle the collision on me:
                 physicsComponent->canCollide = false;
                 physicsComponent->Collide(selfComponent, otherComponent);
@@ -207,19 +218,23 @@ void AnimatorBehaviour(struct Component *selfComponent, struct Game *game)
 
 void AudioBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    AudioComponent* audioComponent = (AudioComponent*)selfComponent->data;
+    AudioComponent *audioComponent = (AudioComponent *)selfComponent->data;
+    //0 - not playing
+    //1 - playing
     int p = Mix_PlayingMusic();
-    audioComponent->__is_playing = p == 1 ? true : false;
-    if (!audioComponent->__is_playing)
+    audioComponent->isPlaying = p == 1 ? true : false;
+
+    if (!audioComponent->isPlaying)
     {
-        switch (audioComponent->audioExtension)
+        switch (audioComponent->audio.audioExtension)
         {
         case WAV:
-            Mix_PlayChannel(-1, audioComponent->audio_wav, audioComponent->loops);
-            audioComponent->__is_playing = true;
+            Mix_PlayChannel(-1, audioComponent->audio.data, audioComponent->loops);
+            audioComponent->isPlaying = true;
             break;
         case MP3:
-            Mix_PlayMusic(audioComponent->audio_mp3, audioComponent->loops);
+            Mix_PlayMusic(audioComponent->audio.data, audioComponent->loops);
+            audioComponent->isPlaying = true;
             break;
         }
     }
@@ -228,7 +243,6 @@ void AudioBehaviour(struct Component *selfComponent, struct Game *game)
 void RenderBehaviour(struct Component *selfComponent, struct Game *game)
 {
     //printf("Render Behaviour Called\n");
-    //get my render component
     RenderComponent *renderComponent = (RenderComponent *)selfComponent->data;
 
     TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
@@ -252,6 +266,16 @@ void EnemyShootBehaviour(struct Component *selfComponent, struct Game *game)
         InitTransformComponent(GetComponentData(bullet, TransformC), vec2_new(tc->position.x, tc->position.y + 15));
         SetEntityActiveStatus(bullet, true);
         Enqueue(game->engine->poolsEngine, bullet);
+
+        struct Entity *audioEmitter = Dequeue(game->engine->poolsEngine, AudioEmitter);
+        struct Component *c = (struct Component *)GetComponent(audioEmitter, AudioC);
+        AudioComponent *audioComponent = (AudioComponent *)c->data;
+
+        TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)GetComponentData(audioEmitter, TimedBehaviourC);
+        tbc->time = 0.2f;
+        audioComponent->SetAudio(c, Explosion1SFX, 0);
+        SetEntityActiveStatus(audioEmitter, true);
+        Enqueue(game->engine->poolsEngine, audioEmitter);
     }
 }
 
@@ -272,15 +296,38 @@ void PlayerShootBehaviour(struct Component *selfComponent, struct Game *game)
             InitTransformComponent(GetComponentData(bullet, TransformC), vec2_new(tc->position.x, tc->position.y - 20));
             SetEntityActiveStatus(bullet, true);
             Enqueue(game->engine->poolsEngine, bullet);
+
+            struct Entity *audioEmitter = Dequeue(game->engine->poolsEngine, AudioEmitter);
+            struct Component *c = (struct Component *)GetComponent(audioEmitter, AudioC);
+            AudioComponent *audioComponent = (AudioComponent *)c->data;
+
+            TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)GetComponentData(audioEmitter, TimedBehaviourC);
+            tbc->time = 0.2f;
+            audioComponent->SetAudio(c, Explosion1SFX, 0);
+            SetEntityActiveStatus(audioEmitter, true);
+            Enqueue(game->engine->poolsEngine, audioEmitter);
         }
     }
 }
 
 void SpawnIslandBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    // float x = GetRandomFloatBetween(-50, 50);
-    // printf("\nRandom float: %f", x);
-    return;
+    TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)selfComponent->data;
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
+    {
+        tbc->elapsedTime = 0;
+        TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
+        struct Entity *island = Dequeue(game->engine->poolsEngine, Background);
+        InitTransformComponent(GetComponentData(island, TransformC), vec2_new(GetRandomFloatBetween(30.0f, 620.0f), tc->position.y));
+        SetEntityActiveStatus(island, true);
+
+        //pick a random island sprite
+        int randomIslandSprite = GetRandomIntBetween(Island3S, Island1S);
+        printf("\nSorteggiata isola: %d", randomIslandSprite);
+        InitRenderComponent(GetComponentData(island, RenderC), game->engine->GfxEngine, randomIslandSprite);
+        Enqueue(game->engine->poolsEngine, island);
+    }
 }
 
 void SpawnEnemyBehaviour(struct Component *selfComponent, struct Game *game)
@@ -291,10 +338,10 @@ void SpawnEnemyBehaviour(struct Component *selfComponent, struct Game *game)
     {
         tbc->elapsedTime = 0;
         TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
-        struct Entity *enemy1 = Dequeue(game->engine->poolsEngine, Enemy);
-        InitTransformComponent(GetComponentData(enemy1, TransformC), vec2_new(GetRandomFloatBetween(15.0f, 625.0f), tc->position.y));
-        SetEntityActiveStatus(enemy1, true);
-        Enqueue(game->engine->poolsEngine, enemy1);
+        struct Entity *enemy = Dequeue(game->engine->poolsEngine, Enemy);
+        InitTransformComponent(GetComponentData(enemy, TransformC), vec2_new(GetRandomFloatBetween(15.0f, 625.0f), tc->position.y));
+        SetEntityActiveStatus(enemy, true);
+        Enqueue(game->engine->poolsEngine, enemy);
     }
 }
 
@@ -332,46 +379,41 @@ void GoToMainMenuAfter(struct Component *selfComponent, struct Game *game)
     {
         tbc->elapsedTime = 0;
         game->sceneToLoad = MainMenuScene;
+        MarkComponentToDestroy(selfComponent);
     }
 }
 
-// void TimedDeactivationBehaviour(struct Component *selfComponent, struct Game *game)
-// {
-//     TimedDeactivationComponent *tdc = (TimedDeactivationComponent *)selfComponent->data;
-//     tdc->deactivationTimeElapsed += game->engine->time->deltaTimeInSeconds;
-//     if (tdc->deactivationTimeElapsed >= tdc->deactivationTime)
-//     {
-//         tdc->deactivationTimeElapsed = 0;
-//     }
-// }
-
-void FadeBehaviour(struct Component *selfComponent, struct Game *game)
+void AlphaBlendingBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    FadeComponent *fadeComponent = (FadeComponent *)selfComponent->data;
+    TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)selfComponent->data;
+
+    int *currentAlpha = (int *)aiv_vector_at(tbc->customArgs, 0);    //currentAlpha - INT
+    int *direction = (int *)aiv_vector_at(tbc->customArgs, 1);       //direction - INT
+    float *accumulator = (float *)aiv_vector_at(tbc->customArgs, 2); //accumulator - FLOAT
+    float *fadeSpeed = (float *)aiv_vector_at(tbc->customArgs, 3);   //fadeSpeed - FLOAT
+
+    *accumulator += *fadeSpeed * game->engine->time->deltaTimeInSeconds * *direction;
+    *currentAlpha = 255 * *accumulator;
+
+    if (abs(*accumulator) > 1.0f)
+    {
+        *accumulator = 0.0f;
+        *direction = -*direction;
+    }
+
     RenderComponent *rc = (RenderComponent *)GetComponentData(selfComponent->owner, RenderC);
-
-    fadeComponent->currentAlpha += fadeComponent->fadeSpeed * game->engine->time->deltaTime;
-
-    if (fadeComponent->currentAlpha < 0)
-    {
-        fadeComponent->currentAlpha = 0;
-        fadeComponent->fadeSpeed = -fadeComponent->fadeSpeed;
-    }
-    else if (fadeComponent->currentAlpha > 255)
-    {
-        fadeComponent->currentAlpha = 255;
-        fadeComponent->fadeSpeed = -fadeComponent->fadeSpeed;
-    }
-
-    fadeComponent->fadeDurationElapsed += game->engine->time->deltaTimeInSeconds;
-    if (fadeComponent->fadeDurationElapsed >= fadeComponent->fadeDuration)
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
     {
         SDL_SetTextureAlphaMod(rc->sprite.texture, 255);
+        void *ptr = aiv_vector_remove_at(tbc->customArgs, aiv_vector_size(tbc->customArgs) - 1);
+        free(ptr);
+        aiv_vector_destroy(tbc->customArgs);
         MarkComponentToDestroy(selfComponent);
         return;
     }
 
-    SDL_SetTextureAlphaMod(rc->sprite.texture, fadeComponent->currentAlpha);
+    SDL_SetTextureAlphaMod(rc->sprite.texture, *currentAlpha);
 }
 
 //COMPONENTS CALLS FROM OUTSIDE-----------------------------------------------------------------------
@@ -392,7 +434,7 @@ void PlayerDeath(struct Component *selfComponent, struct Game *game)
         SetComponentActiveStatus(ic, false);
 
         struct Component *tb = AddComponent(selfComponent->owner, TimedBehaviourC, GoToMainMenuAfter);
-        InitTimedBehaviourComponent(tb->data, 1, 3.0f);
+        InitTimedBehaviourComponent(tb->data, 1, 3.0f, NULL);
 
         TransformComponent *transformComponent = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
         MovementComponent *movementComponent = (MovementComponent *)GetComponentData(selfComponent->owner, MovementC);
@@ -404,6 +446,8 @@ void PlayerDeath(struct Component *selfComponent, struct Game *game)
         otherTransformComponent->position = transformComponent->position;
         otherMovementComponent->velocity = movementComponent->velocity;
         otherMovementComponent->speed = movementComponent->speed;
+
+        movementComponent->velocity = vec2_new(0, 0);
         SetEntityActiveStatus(particle, true);
         Enqueue(game->engine->poolsEngine, particle);
         //SetEntityActiveStatus(selfComponent->owner, false);
@@ -412,14 +456,29 @@ void PlayerDeath(struct Component *selfComponent, struct Game *game)
     }
 
     struct Component *tb = AddComponent(selfComponent->owner, TimedBehaviourC, PlayerTimedRespawnBehaviour);
-    InitTimedBehaviourComponent(tb->data, 1, 5.0f);
+    InitTimedBehaviourComponent(tb->data, 1, 5.0f, NULL);
 
-    struct Component *fc = AddComponent(selfComponent->owner, FadeC, FadeBehaviour);
-    InitFadeComponent(fc->data, 255, 5.0f, -6.5f);
+    tb = AddComponent(selfComponent->owner, TimedBehaviourC, AlphaBlendingBehaviour);
+    aiv_vector *args = aiv_vector_new_with_cap(4);
+    int *currentAlpha = malloc(1 * sizeof(int));    //currentAlpha - INT
+    int *direction = malloc(1 * sizeof(int));       //direction - INT
+    float *accumulator = malloc(1 * sizeof(float)); //accumulator - FLOAT
+    float *fadeSpeed = malloc(1 * sizeof(float));   //fadeSpeed - FLOAT
+    *currentAlpha = 255;
+    *direction = -1;
+    *accumulator = 0.0f;
+    *fadeSpeed = 5.0f;
+
+    aiv_vector_add(args, currentAlpha);
+    aiv_vector_add(args, direction);
+    aiv_vector_add(args, accumulator);
+    aiv_vector_add(args, fadeSpeed);
+    InitTimedBehaviourComponent(tb->data, 1, 3.0f, args);
 }
 
 void EnemyDeath(struct Component *selfComponent, struct Game *game)
 {
+    //spawn particle
     struct Entity *particle = Dequeue(game->engine->poolsEngine, Particle);
     TransformComponent *transformComponent = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
     MovementComponent *movementComponent = (MovementComponent *)GetComponentData(selfComponent->owner, MovementC);
@@ -432,6 +491,17 @@ void EnemyDeath(struct Component *selfComponent, struct Game *game)
     otherMovementComponent->speed = movementComponent->speed;
     SetEntityActiveStatus(particle, true);
     Enqueue(game->engine->poolsEngine, particle);
+
+    //spawn audio emitter
+    struct Entity *audioEmitter = Dequeue(game->engine->poolsEngine, AudioEmitter);
+    struct Component *c = (struct Component *)GetComponent(audioEmitter, AudioC);
+    AudioComponent *audioComponent = (AudioComponent *)c->data;
+    TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)GetComponentData(audioEmitter, TimedBehaviourC);
+    tbc->time = 1.2f;
+    audioComponent->SetAudio(c, Explosion2SFX, 0);
+    SetEntityActiveStatus(audioEmitter, true);
+    Enqueue(game->engine->poolsEngine, audioEmitter);
+
     SetEntityActiveStatus(selfComponent->owner, false);
 }
 
@@ -543,30 +613,25 @@ void QuitGameClick(struct Component *selfComponent, struct Game *game)
     game->quitRequest = true;
 }
 
-//COMPONENTS INIT METHODS----------------------------------------------------------------------------------------
-
-void InitFadeComponent(FadeComponent *fadeComponent, int startingAlpha, float fadeDuration, float fadeSpeed)
+void SetAudio(struct Component *selfComponent, AudioType type, int loops)
 {
-    fadeComponent->startingAlpha = startingAlpha;
-    fadeComponent->currentAlpha = startingAlpha;
-    fadeComponent->fadeDuration = fadeDuration;
-    fadeComponent->fadeSpeed = fadeSpeed;
-    fadeComponent->fadeDurationElapsed = 0;
+    AudioComponent *audioComponent = (AudioComponent *)selfComponent->data;
+    audioComponent->audio = GetSound(audioComponent->engine, type);
+    audioComponent->loops = loops;
+    audioComponent->isPlaying = false;
 }
 
-void InitTimedBehaviourComponent(TimedBehaviourComponent *timedBehaviourComponent, int repetitions, float time)
+//COMPONENTS INIT METHODS----------------------------------------------------------------------------------------
+
+void InitTimedBehaviourComponent(TimedBehaviourComponent *timedBehaviourComponent, int repetitions, float time, aiv_vector *customArgs)
 {
     timedBehaviourComponent->repetitions = repetitions;
     timedBehaviourComponent->currentRepetitions = 0;
     timedBehaviourComponent->time = time;
     timedBehaviourComponent->elapsedTime = 0;
+    timedBehaviourComponent->customArgs = customArgs;
+    printf("\n---Timed Behaviour Component Initialized!");
 }
-
-// void InitTimedDeactivationComponent(TimedDeactivationComponent *timedDeactivationComponent, float deactivationTime)
-// {
-//     timedDeactivationComponent->deactivationTime = deactivationTime;
-//     timedDeactivationComponent->deactivationTimeElapsed = 0;
-// }
 
 void InitMovementComponent(MovementComponent *movementComponent, vec2 velocity, float speed)
 {
@@ -670,25 +735,11 @@ void InitShootComponent(ShootComponent *selfComponent, float shootCooldown, Enti
     selfComponent->bulletType = bulletType;
 }
 
-void InitAudioComponent(struct Component* selfComponent, const char *path, int loops, AudioExtension audioExtension)
+void InitAudioComponent(struct Component *selfComponent, struct AudioEngine *engine, AudioType audioType, int loops, void (*SetAudio)(struct Component *selfComponent, AudioType type, int loops))
 {
-    // component *comp = __component_new(go);
-
-    // audio_emitter *a = (audio_emitter *)malloc(sizeof(audio_emitter));
-    // a->loops = loops;
-    // a->path = path;
-    // a->__is_playing = false;
-    // a->audio_ext = audio_ext;
-
-    // switch (audio_ext)
-    // {
-    // case WAV:
-    //     a->audio_wav = Mix_LoadWAV(path);
-    //     break;
-    // case MP3:
-    //     a->audio_mp3 = Mix_LoadMUS(path);
-    //     break;
-    // default:
-    //     break;
-    // }
+    AudioComponent *ac = (AudioComponent *)selfComponent->data;
+    ac->engine = engine;
+    ac->SetAudio = SetAudio;
+    ac->SetAudio(selfComponent, audioType, loops);
+    printf("\nSO ARIVATO QUA");
 }

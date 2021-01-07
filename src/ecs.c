@@ -27,10 +27,10 @@ struct EntityComponentSystem *ECSReset(struct EntityComponentSystem *ECS)
 
 void DestroyECS(struct EntityComponentSystem *ECS)
 {
-    DestroyComponents(ECS->componentsToDestroy);
+    //DestroyComponents(ECS->componentsToDestroy);
     aiv_vector_destroy(ECS->componentsToDestroy);
 
-    DestroyEntities(ECS->entitiesToDestroy);
+    //DestroyEntities(ECS->entitiesToDestroy);
     aiv_vector_destroy(ECS->entitiesToDestroy);
 
     DestroyEntities(ECS->entities);
@@ -137,12 +137,12 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         component->data = animatorComponent;
         break;
 
-    case FadeC:
-        FadeComponent *fadeComponent = (FadeComponent *)calloc(1, sizeof(FadeComponent));
-        if (fadeComponent == NULL)
+    case AudioC:
+        AudioComponent *audioComponent = (AudioComponent *)calloc(1, sizeof(AudioComponent));
+        if (audioComponent == NULL)
             break;
-        component->type = FadeC;
-        component->data = fadeComponent;
+        component->type = AudioC;
+        component->data = audioComponent;
         break;
 
     case RenderC:
@@ -199,6 +199,12 @@ void MarkComponentToDestroy(struct Component *component)
 {
     component->active = false;
     component->markedToDestroy = true;
+    for (int i = 0; i < aiv_vector_size(component->owner->components); i++)
+    {
+        if (component == aiv_vector_at(component->owner->components, i))
+            aiv_vector_remove_at(component->owner->components, i);
+    }
+
     aiv_vector_add(component->owner->ECS->componentsToDestroy, component);
 }
 
@@ -221,20 +227,24 @@ void MarkEntityToDestroy(struct Entity *entity)
 
 void DestroyComponent(struct Component *component)
 {
-    //TODO: also remove from componentsToDestroy list in ECS!!!
+    // int componentType = component->type;
+    // int ownerType = component->owner->type;
+    // int componentIndex = component->__systemIndex;
+    // int ownerIndex = component->__systemIndex;
 
     //THIS IS TOTALLY UNOPTIMIZED! REMOVE ALL AT ONCE!
+    //printf("\n- Removing component of type %d with systemindex %d from entity of type %d with entityindex %d", componentType, componentIndex, ownerType, ownerIndex);
     RemoveFromSystems(component);
     //---
     //printf("\n%d", component->owner->__entityIndex);
     free(component->data);
     free(component);
+    //printf("   -   Succesfully removed!");
 }
 
 void DestroyEntity(struct Entity *entity)
 {
     UnregisterEntity(entity);
-    //TODO: also remove from entitiesToDestroy list in ECS!!!
     for (int i = entity->components->__count - 1; i >= 0; i--)
     {
         struct Component *component = aiv_vector_remove_at(entity->components, i);

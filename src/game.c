@@ -1,9 +1,9 @@
 #include "game.h"
 
-//DEFINE THE COMPONENTS AND THEIR BEHAVIOUR FOR EACH ENTITY HERE
-void AddComponents(struct Entity *entity, EntityType entityType)
+//DEFINE THE BASIC COMPONENTS FOR EACH ENTITY AND THEIR SYSTEM BEHAVIOUR
+void AddComponents(struct Entity *entity)
 {
-    switch (entityType)
+    switch (entity->type)
     {
     case Player:
         AddComponent(entity, TransformC, NULL);
@@ -51,8 +51,14 @@ void AddComponents(struct Entity *entity, EntityType entityType)
     case Background:
         AddComponent(entity, TransformC, NULL);
         AddComponent(entity, RenderC, RenderBehaviour);
+        break;
     case SceneManager:
         AddComponent(entity, TransformC, NULL);
+        //AddComponent(entity, AudioC, AudioBehaviour);
+        break;
+    case AudioEmitter:
+        AddComponent(entity, AudioC, AudioBehaviour);
+        AddComponent(entity, TimedBehaviourC, ToggleEntityAfterBehaviour);
         break;
     }
 }
@@ -60,18 +66,18 @@ void AddComponents(struct Entity *entity, EntityType entityType)
 void LoadMainMenu(struct Game *game)
 {
     struct Entity *backGround = CreateEntity(Background, true, game->ECS);
-    AddComponents(backGround, Background);
+    AddComponents(backGround);
     InitTransformComponent(GetComponentData(backGround, TransformC), vec2_new(game->engine->GfxEngine->windowWidth * 0.5f, game->engine->GfxEngine->windowHeight * 0.5f));
     InitRenderComponent(GetComponentData(backGround, RenderC), game->engine->GfxEngine, TitleS);
 
     struct Entity *buttonStart = CreateEntity(Button, true, game->ECS);
-    AddComponents(buttonStart, Button);
+    AddComponents(buttonStart);
     InitTransformComponent(GetComponentData(buttonStart, TransformC), vec2_new(game->engine->GfxEngine->windowWidth * 0.5f + 75, game->engine->GfxEngine->windowHeight * 0.5f + 35));
     InitButtonComponent(GetComponent(buttonStart, ButtonC), StartGameClick, ButtonHoverStart, ButtonHoverEnd);
     InitRenderComponent(GetComponentData(buttonStart, RenderC), game->engine->GfxEngine, StartButtonS);
 
     struct Entity *buttonQuit = CreateEntity(Button, true, game->ECS);
-    AddComponents(buttonQuit, Button);
+    AddComponents(buttonQuit);
     InitTransformComponent(GetComponentData(buttonQuit, TransformC), vec2_new(game->engine->GfxEngine->windowWidth * 0.5f + 75, game->engine->GfxEngine->windowHeight * 0.5f + 90));
     InitButtonComponent(GetComponent(buttonQuit, ButtonC), QuitGameClick, ButtonHoverStart, ButtonHoverEnd);
     InitRenderComponent(GetComponentData(buttonQuit, RenderC), game->engine->GfxEngine, QuitButtonS);
@@ -83,19 +89,21 @@ void LoadGameScene(struct Game *game)
 {
     //CREATE AND INITIALIZE THE GAME SCENE MANAGER
     struct Entity *sceneManager = CreateEntity(SceneManager, true, game->ECS);
-    AddComponents(sceneManager, SceneManager);
+    AddComponents(sceneManager);
     InitTransformComponent(GetComponentData(sceneManager, TransformC), vec2_new(game->engine->GfxEngine->windowWidth * 0.5f, -40));
     struct Component *c = NULL;
     c = AddComponent(sceneManager, TimedBehaviourC, SpawnEnemyBehaviour);
-    InitTimedBehaviourComponent(c->data, -1, 3.0f);
-    // c = AddComponent(sceneManager, TimedBehaviourC, SpawnIslandBehaviour);
-    // InitTimedBehaviourComponent(c->data, -1, 2.5f);
+    InitTimedBehaviourComponent(c->data, -1, 3.0f, NULL);
+    c = AddComponent(sceneManager, TimedBehaviourC, SpawnIslandBehaviour);
+    InitTimedBehaviourComponent(c->data, -1, 2.8f, NULL);
+    //InitAudioComponent(GetComponent(sceneManager, AudioC), game->engine->audioEngine, BackgroundMusic, -1, SetAudio);
+    Mix_VolumeMusic(50);
 
     //CREATE AND INITIALIZE THE WATER BACKGROUNDS TO SWAP
     for (int i = 0; i < 2; i++)
     {
         struct Entity *waterBackground = CreateEntity(Background, true, game->ECS);
-        AddComponents(waterBackground, Background);
+        AddComponents(waterBackground);
         AddComponent(waterBackground, MovementC, WaterMovementBehaviour);
         if (i == 0)
             InitTransformComponent(GetComponentData(waterBackground, TransformC), vec2_new(game->engine->GfxEngine->windowWidth * 0.5f, game->engine->GfxEngine->windowHeight * 0.5f));
@@ -105,16 +113,29 @@ void LoadGameScene(struct Game *game)
         InitRenderComponent(GetComponentData(waterBackground, RenderC), game->engine->GfxEngine, WaterS);
     }
 
-    //CREATE AND POOL THE PARTICLES
+    //CREATE AND INITIALIZE THE ISLANDS
     for (int i = 0; i < 10; i++)
+    {
+        printf("Creating islands...");
+        struct Entity *island = CreateEntity(Background, false, game->ECS);
+        AddComponents(island);
+        AddComponent(island, MovementC, AutomatedMovementBehaviour);
+        InitTransformComponent(GetComponentData(island, TransformC), vec2_new(-100, -100));
+        InitMovementComponent(GetComponentData(island, MovementC), vec2_new(0, 1), 0.1f);
+        InitRenderComponent(GetComponentData(island, RenderC), game->engine->GfxEngine, Island1S);
+        Enqueue(game->engine->poolsEngine, island);
+    }
+
+    //CREATE AND POOL THE PARTICLES
+    for (int i = 0; i < 15; i++)
     {
         printf("Creating particles...");
         struct Entity *particle = CreateEntity(Particle, false, game->ECS);
-        AddComponents(particle, Particle);
+        AddComponents(particle);
         InitTransformComponent(GetComponentData(particle, TransformC), vec2_new(-100, -100));
-        InitTimedBehaviourComponent(GetComponentData(particle, TimedBehaviourC), 1, 0.9f);
+        InitTimedBehaviourComponent(GetComponentData(particle, TimedBehaviourC), 1, 0.9f, NULL);
         InitMovementComponent(GetComponentData(particle, MovementC), vec2_new(0, 0), 0);
-        InitRenderComponent(GetComponentData(particle, RenderC), game->engine->GfxEngine, NullS);
+        InitRenderComponent(GetComponentData(particle, RenderC), game->engine->GfxEngine, NullSprite);
         InitAnimatorComponent(GetComponent(particle, AnimatorC), game->engine->GfxEngine, EnemyExplosionA, 0.15f, SetAnimation);
         Enqueue(game->engine->poolsEngine, particle);
     }
@@ -124,7 +145,7 @@ void LoadGameScene(struct Game *game)
     {
         printf("Creating enemy bullets...");
         struct Entity *enemyBullet = CreateEntity(EnemyBullet, false, game->ECS);
-        AddComponents(enemyBullet, EnemyBullet);
+        AddComponents(enemyBullet);
         InitTransformComponent(GetComponentData(enemyBullet, TransformC), vec2_new(-100, -100));
         InitMovementComponent(GetComponentData(enemyBullet, MovementC), vec2_new(0, 1), 0.2f);
         InitRenderComponent(GetComponentData(enemyBullet, RenderC), game->engine->GfxEngine, EnemyBullet1S);
@@ -137,7 +158,7 @@ void LoadGameScene(struct Game *game)
     {
         printf("Creating player bullets...");
         struct Entity *playerBullet = CreateEntity(PlayerBullet, false, game->ECS);
-        AddComponents(playerBullet, PlayerBullet);
+        AddComponents(playerBullet);
         InitTransformComponent(GetComponentData(playerBullet, TransformC), vec2_new(-200, -200));
         InitMovementComponent(GetComponentData(playerBullet, MovementC), vec2_new(0, -1), 0.2f);
         InitRenderComponent(GetComponentData(playerBullet, RenderC), game->engine->GfxEngine, PlayerBulletS);
@@ -150,44 +171,50 @@ void LoadGameScene(struct Game *game)
     {
         printf("Creating enemies...");
         struct Entity *enemy = CreateEntity(Enemy, false, game->ECS);
-        AddComponents(enemy, Enemy);
+        AddComponents(enemy);
         InitTransformComponent(GetComponentData(enemy, TransformC), vec2_new(-100, -100));
         InitHealthComponent(GetComponentData(enemy, HealthC), 1, 1, 100.0f, 100.0f, ChangeHealth, EnemyDeath);
         InitMovementComponent(GetComponentData(enemy, MovementC), vec2_new(0, 1), 0.05f);
-        InitRenderComponent(GetComponentData(enemy, RenderC), game->engine->GfxEngine, NullS);
+        InitRenderComponent(GetComponentData(enemy, RenderC), game->engine->GfxEngine, NullSprite);
         InitAnimatorComponent(GetComponent(enemy, AnimatorC), game->engine->GfxEngine, Enemy1A, 0.3f, SetAnimation);
         InitPhysicsComponent(GetComponent(enemy, PhysicsC), Collide);
         InitShootComponent(GetComponentData(enemy, ShootC), 2.0, EnemyBullet);
         Enqueue(game->engine->poolsEngine, enemy);
     }
 
+    for (int i = 0; i < 20; i++)
+    {
+        printf("Creating audio emitters...");
+        struct Entity *audioEmitter = CreateEntity(AudioEmitter, false, game->ECS);
+        AddComponents(audioEmitter);
+        InitAudioComponent(GetComponent(audioEmitter, AudioC), game->engine->audioEngine, BackgroundMusic, -1, SetAudio);
+        InitTimedBehaviourComponent(GetComponentData(audioEmitter, TimedBehaviourC), 1, 0.2f, NULL);
+        Enqueue(game->engine->poolsEngine, audioEmitter);
+    }
+
     //CREATE AND INITIALIZE THE PLAYER
     printf("Creating player...");
     struct Entity *player = CreateEntity(Player, true, game->ECS);
-    AddComponents(player, Player);
+    AddComponents(player);
     InitTransformComponent(GetComponentData(player, TransformC), vec2_new(game->engine->GfxEngine->windowWidth * 0.5f, game->engine->GfxEngine->windowHeight - 100));
-    InitHealthComponent(GetComponentData(player, HealthC), 4, 3, 100.0f, 100.0f, ChangeHealth, PlayerDeath);
+    InitHealthComponent(GetComponentData(player, HealthC), 4, 2, 1.0f, 1.0f, ChangeHealth, PlayerDeath);
     InitMovementComponent(GetComponentData(player, MovementC), vec2_new(0, 0), 0.2f);
-    InitRenderComponent(GetComponentData(player, RenderC), game->engine->GfxEngine, NullS);
+    InitRenderComponent(GetComponentData(player, RenderC), game->engine->GfxEngine, NullSprite);
     InitAnimatorComponent(GetComponent(player, AnimatorC), game->engine->GfxEngine, PlayerA, 0.3f, SetAnimation);
     InitPhysicsComponent(GetComponent(player, PhysicsC), Collide);
-    InitShootComponent(GetComponentData(player, ShootC), 1.0, PlayerBullet);
+    InitShootComponent(GetComponentData(player, ShootC), 0.35f, PlayerBullet);
 
-    // struct Entity *enemy1 = Dequeue(game->engine->poolsEngine, Enemy);
-    // InitTransformComponent(GetComponentData(enemy1, TransformC), vec2_new(100, 200));
-    // SetEntityActiveStatus(enemy1, true);
-    // Enqueue(game->engine->poolsEngine, enemy1);
-
-    // struct Entity *enemy2 = Dequeue(game->engine->poolsEngine, Enemy);
-    // InitTransformComponent(GetComponentData(enemy2, TransformC), vec2_new(300, 200));
-    // SetEntityActiveStatus(enemy2, true);
-    // Enqueue(game->engine->poolsEngine, enemy2);
-    // printf("GAME SCENE LOADED");
+    printf("GAME SCENE LOADED");
 }
 
 int GetRandomInt(int max)
 {
     return rand() % max;
+}
+
+int GetRandomIntBetween(int max, int min)
+{
+    return (rand() % (max + 1 - min)) + min;
 }
 
 float GetRandomFloat(float max)
@@ -254,7 +281,7 @@ void GameLoop(struct Game *game)
 {
     CreateScene(game->engine->scenesEngine, LoadMainMenu, MainMenuScene); //main menu missing audio for now...
     CreateScene(game->engine->scenesEngine, LoadGameScene, GameScene);
-    LoadScene(game->engine->scenesEngine, game, GameScene);
+    LoadScene(game->engine->scenesEngine, game, MainMenuScene);
     game->sceneToLoad = None;
 
     while (!game->quitRequest)
