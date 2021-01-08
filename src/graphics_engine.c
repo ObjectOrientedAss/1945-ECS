@@ -150,13 +150,13 @@ void LoadSpriteSheets(struct GFXEngine *engine)
 
     spriteSheet = CreateSpriteSheet("resources/assets/NotFound.png", 1, 0.1f, NullAnimation, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
-    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy1_strip3.png", 3, 0.1f, Enemy1A, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy1_strip3.png", 3, 0.3f, Enemy1A, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
-    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy2_strip3.png", 3, 0.1f, Enemy2A, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy2_strip3.png", 3, 0.3f, Enemy2A, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
-    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy3_strip3.png", 3, 0.1f, Enemy3A, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy3_strip3.png", 3, 0.3f, Enemy3A, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
-    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy4_strip3.png", 3, 0.1f, Enemy4A, engine->renderer);
+    spriteSheet = CreateSpriteSheet("resources/assets/enemy/enemy4_strip3.png", 3, 0.3f, Enemy4A, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
     spriteSheet = CreateSpriteSheet("resources/assets/enemy/explosion1_strip6.png", 6, 0.1f, EnemyExplosionA, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);

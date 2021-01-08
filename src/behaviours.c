@@ -33,9 +33,9 @@ void InputBehaviour(struct Component *selfComponent, struct Game *game)
         inputComponent->shoot = false;
 }
 
-void ButtonBehaviour(struct Component *selfComponent, struct Game *game)
+void UIBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    ButtonComponent *buttonComponent = (ButtonComponent *)selfComponent->data;
+    UIComponent *uiComponent = (UIComponent *)selfComponent->data;
 
     RenderComponent *renderComponent = (RenderComponent *)GetComponentData(selfComponent->owner, RenderC);
     TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
@@ -48,25 +48,25 @@ void ButtonBehaviour(struct Component *selfComponent, struct Game *game)
     {
         //printf("Mouse is over the button!!!!!!!!!");
         //if it is the first frame in which the mouse has started hovering
-        if (!buttonComponent->isHovering)
+        if (!uiComponent->isHovering)
         {
-            buttonComponent->isHovering = true;
-            if (buttonComponent->OnHoverStart != NULL)
-                buttonComponent->OnHoverStart(selfComponent);
+            uiComponent->isHovering = true;
+            if (uiComponent->OnHoverStart != NULL)
+                uiComponent->OnHoverStart(selfComponent);
         }
         else
         {
             if (game->mouseDown)
-                buttonComponent->OnClick(selfComponent, game);
+                uiComponent->OnClick(selfComponent, game);
         }
     }
     else //if the mouse is not over the button
     {
-        if (buttonComponent->isHovering)
+        if (uiComponent->isHovering)
         {
-            buttonComponent->isHovering = false;
-            if (buttonComponent->OnHoverEnd != NULL)
-                buttonComponent->OnHoverEnd(selfComponent);
+            uiComponent->isHovering = false;
+            if (uiComponent->OnHoverEnd != NULL)
+                uiComponent->OnHoverEnd(selfComponent);
         }
     }
 }
@@ -216,27 +216,17 @@ void AnimatorBehaviour(struct Component *selfComponent, struct Game *game)
     }
 }
 
-void AudioBehaviour(struct Component *selfComponent, struct Game *game)
+void PlayAudio(struct Component* selfComponent, struct Game *game)
 {
-    AudioComponent *audioComponent = (AudioComponent *)selfComponent->data;
-    //0 - not playing
-    //1 - playing
-    int p = Mix_PlayingMusic();
-    audioComponent->isPlaying = p == 1 ? true : false;
-
-    if (!audioComponent->isPlaying)
+    AudioComponent* audioComponent = selfComponent->data;
+    switch (audioComponent->audio.audioExtension)
     {
-        switch (audioComponent->audio.audioExtension)
-        {
-        case WAV:
-            Mix_PlayChannel(-1, audioComponent->audio.data, audioComponent->loops);
-            audioComponent->isPlaying = true;
-            break;
-        case MP3:
-            Mix_PlayMusic(audioComponent->audio.data, audioComponent->loops);
-            audioComponent->isPlaying = true;
-            break;
-        }
+    case WAV:
+        Mix_PlayChannel(-1, audioComponent->audio.data, audioComponent->loops);
+        break;
+    case MP3:
+        Mix_PlayMusic(audioComponent->audio.data, audioComponent->loops);
+        break;
     }
 }
 
@@ -275,6 +265,7 @@ void EnemyShootBehaviour(struct Component *selfComponent, struct Game *game)
         tbc->time = 0.2f;
         audioComponent->SetAudio(c, Explosion1SFX, 0);
         SetEntityActiveStatus(audioEmitter, true);
+        audioComponent->PlayAudio(c, game);
         Enqueue(game->engine->poolsEngine, audioEmitter);
     }
 }
@@ -305,6 +296,7 @@ void PlayerShootBehaviour(struct Component *selfComponent, struct Game *game)
             tbc->time = 0.2f;
             audioComponent->SetAudio(c, Explosion1SFX, 0);
             SetEntityActiveStatus(audioEmitter, true);
+            audioComponent->PlayAudio(c, game);
             Enqueue(game->engine->poolsEngine, audioEmitter);
         }
     }
@@ -324,7 +316,6 @@ void SpawnIslandBehaviour(struct Component *selfComponent, struct Game *game)
 
         //pick a random island sprite
         int randomIslandSprite = GetRandomIntBetween(Island3S, Island1S);
-        printf("\nSorteggiata isola: %d", randomIslandSprite);
         InitRenderComponent(GetComponentData(island, RenderC), game->engine->GfxEngine, randomIslandSprite);
         Enqueue(game->engine->poolsEngine, island);
     }
@@ -340,6 +331,10 @@ void SpawnEnemyBehaviour(struct Component *selfComponent, struct Game *game)
         TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
         struct Entity *enemy = Dequeue(game->engine->poolsEngine, Enemy);
         InitTransformComponent(GetComponentData(enemy, TransformC), vec2_new(GetRandomFloatBetween(15.0f, 625.0f), tc->position.y));
+        int randomEnemyAnimation = GetRandomIntBetween(Enemy4A, Enemy1A);
+        struct Component* c = GetComponent(enemy, AnimatorC);
+        AnimatorComponent* ac = c->data;
+        ac->SetAnimation(c, randomEnemyAnimation, 0);
         SetEntityActiveStatus(enemy, true);
         Enqueue(game->engine->poolsEngine, enemy);
     }
@@ -501,7 +496,7 @@ void EnemyDeath(struct Component *selfComponent, struct Game *game)
     audioComponent->SetAudio(c, Explosion2SFX, 0);
     SetEntityActiveStatus(audioEmitter, true);
     Enqueue(game->engine->poolsEngine, audioEmitter);
-
+    audioComponent->PlayAudio(c, game);
     SetEntityActiveStatus(selfComponent->owner, false);
 }
 
@@ -560,6 +555,8 @@ void ChangeHealth(HealthComponent *selfComponent, float amount)
         selfComponent->currentHealth = selfComponent->maxHealth;
 }
 
+//Set the animation to perform on the given animator component.
+//If you also want to alter the frame duration of the spritesheet, pass a value > 0.
 void SetAnimation(struct Component *selfComponent, AnimationType type, float frameDuration)
 {
     AnimatorComponent *animatorComponent = (AnimatorComponent *)selfComponent->data;
@@ -591,6 +588,7 @@ void ButtonHoverStart(struct Component *selfComponent)
     rc->sprite.spriteRect.h += 10;
 }
 
+//
 void ButtonHoverEnd(struct Component *selfComponent)
 {
     printf("Hovering on button ended");
@@ -599,20 +597,21 @@ void ButtonHoverEnd(struct Component *selfComponent)
     rc->sprite.spriteRect.h -= 10;
 }
 
-//the start button and the quit button
-
+//the start button click event in the main menu
 void StartGameClick(struct Component *selfComponent, struct Game *game)
 {
     printf("Clicking on Start Game");
     game->sceneToLoad = GameScene;
 }
 
+//the quit button click event in the main menu
 void QuitGameClick(struct Component *selfComponent, struct Game *game)
 {
     printf("Clicking on Quit Game");
     game->quitRequest = true;
 }
 
+//set the audio on an audio component (it will play when the entity is active)
 void SetAudio(struct Component *selfComponent, AudioType type, int loops)
 {
     AudioComponent *audioComponent = (AudioComponent *)selfComponent->data;
@@ -658,9 +657,9 @@ void InitHealthComponent(HealthComponent *healthComponent, int maxLives, int sta
     printf("\n---Health Component Initialized!");
 }
 
-void InitButtonComponent(struct Component *selfComponent, void (*OnClick)(struct Component *selfComponent, struct Game *game), void (*OnHoverStart)(struct Component *selfComponent), void (*OnHoverEnd)(struct Component *selfComponent))
+void InitUIComponent(struct Component *selfComponent, void (*OnClick)(struct Component *selfComponent, struct Game *game), void (*OnHoverStart)(struct Component *selfComponent), void (*OnHoverEnd)(struct Component *selfComponent))
 {
-    ButtonComponent *buttonComponent = (ButtonComponent *)selfComponent->data;
+    UIComponent *buttonComponent = (UIComponent *)selfComponent->data;
     buttonComponent->OnClick = OnClick;
     buttonComponent->OnHoverStart = OnHoverStart;
     buttonComponent->OnHoverEnd = OnHoverEnd;
@@ -688,12 +687,10 @@ void InitPhysicsComponent(struct Component *selfComponent, void (*Collide)(struc
     case Player:
         physicsComponent->layersBitmask = ENEMY_COLLISION_LAYER | ENEMYBULLET_COLLISION_LAYER;
         physicsComponent->selfLayer = PLAYER_COLLISION_LAYER;
-
         break;
     case Enemy:
         physicsComponent->layersBitmask = PLAYER_COLLISION_LAYER | PLAYERBULLET_COLLISION_LAYER;
         physicsComponent->selfLayer = ENEMYBULLET_COLLISION_LAYER;
-
         break;
     case PlayerBullet:
         physicsComponent->layersBitmask = ENEMY_COLLISION_LAYER;
@@ -735,11 +732,12 @@ void InitShootComponent(ShootComponent *selfComponent, float shootCooldown, Enti
     selfComponent->bulletType = bulletType;
 }
 
-void InitAudioComponent(struct Component *selfComponent, struct AudioEngine *engine, AudioType audioType, int loops, void (*SetAudio)(struct Component *selfComponent, AudioType type, int loops))
+void InitAudioComponent(struct Component *selfComponent, struct AudioEngine *engine, AudioType audioType, int loops, void (*SetAudio)(struct Component *selfComponent, AudioType type, int loops), void (*PlayAudio)(struct Component *selfComponent, struct Game *game))
 {
     AudioComponent *ac = (AudioComponent *)selfComponent->data;
     ac->engine = engine;
     ac->SetAudio = SetAudio;
     ac->SetAudio(selfComponent, audioType, loops);
+    ac->PlayAudio = PlayAudio;
     printf("\nSO ARIVATO QUA");
 }

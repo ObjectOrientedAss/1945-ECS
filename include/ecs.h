@@ -18,7 +18,8 @@ typedef enum c_layer CollisionLayer;
 enum c_type
 {
     //------DATA SYSTEMS------//
-    TransformC = -1,
+    AudioC = -2,
+    TransformC,
 
     //^^^^^^DATA SYSTEMS^^^^^^//
 
@@ -29,13 +30,12 @@ enum c_type
     TimedBehaviourC,
     InputC,
     ShootC,
-    ButtonC,
+    UIC,
     MovementC,
     PhysicsC,
     HealthC,
     AnimatorC,
     SoundC,
-    AudioC,
     RenderC,
 
     //^^^^^^ECS  SYSTEMS^^^^^^//
@@ -102,6 +102,7 @@ typedef struct
     boolean shoot;
 } InputComponent;
 
+//SHOOT COMPONENT BEHAVIOUR: should spawn a bullet if the condition to shoot is valid
 typedef struct
 {
     double shootCooldown;
@@ -109,6 +110,7 @@ typedef struct
     EntityType bulletType;
 } ShootComponent;
 
+//TIMED COMPONENT BEHAVIOUR: should constantly update a timer and perform an action when it expires
 typedef struct
 {
     int currentRepetitions;
@@ -118,13 +120,14 @@ typedef struct
     aiv_vector* customArgs;
 } TimedBehaviourComponent;
 
+//UI COMPONENT BEHAVIOUR: should check the user interactions with itself and perform the right callbacks
 typedef struct 
 {
-    boolean isHovering;                              //set it to true when Hover Start is called
-    void(*OnHoverStart)(void *selfComponent);        //The behaviour to execute when the mouse starts hovering on this button. Params: Component*
-    void(*OnHoverEnd)(void *selfComponent);          //The behaviour to execute when the mouse ends hovering on this button. Params: Component*
-    void(*OnClick)(void *selfComponent, void* game); //The behaviour to execute when the mouse is clicked on this button. Params: Component*, Game*
-} ButtonComponent;
+    boolean isHovering;                                                 //set it to true when Hover Start is called
+    void(*OnHoverStart)(struct Component *selfComponent);               //The behaviour to execute when the mouse starts hovering on this UI element.
+    void(*OnHoverEnd)(struct Component *selfComponent);                 //The behaviour to execute when the mouse ends hovering on this UI element.
+    void(*OnClick)(struct Component *selfComponent, struct Game* game); //The behaviour to execute when the mouse is clicked on this UI element.
+} UIComponent;
 
 //MOVEMENT COMPONENT BEHAVIOUR: should move the entity
 typedef struct
@@ -145,7 +148,7 @@ typedef struct
     boolean canCollide;    //has this collider collided in this frame?
 } PhysicsComponent;
 
-//HEALTH COMPONENT BEHAVIOUR: should check if the current health of the entity is <= 0 and trigger death if it happens
+//HEALTH COMPONENT BEHAVIOUR: should manage health changes and check if the current health of the entity is <= 0 to trigger death if it happens
 typedef struct
 {
     int maxLives;
@@ -167,15 +170,6 @@ typedef struct
     void (*SetAnimation)(struct Component *selfComponent, AnimationType type, float frameDuration);
 } AnimatorComponent;
 
-typedef struct
-{
-    struct AudioEngine* engine;
-    struct Audio audio;
-    int loops;
-    void (*SetAudio)(struct Component* selfComponent, AudioType type, int loops);
-    boolean isPlaying;
-} AudioComponent;
-
 //RENDER COMPONENT BEHAVIOUR: should render the entity sprite
 typedef struct
 {
@@ -192,8 +186,17 @@ They don't need to have a behaviour, but if you want to use it for any reason, r
 typedef struct
 {
     vec2 position;
-    //rotation e scale non mi servono in 1945...
 } TransformComponent;
+
+typedef struct
+{
+    struct AudioEngine* engine;
+    struct Audio audio;
+    int loops;
+    void (*SetAudio)(struct Component* selfComponent, AudioType type, int loops);
+    void (*PlayAudio)(struct Component *selfComponent, struct Game *game);
+    boolean isPlaying;
+} AudioComponent;
 
 //-----END OF DATA SYSTEMS-----//
 

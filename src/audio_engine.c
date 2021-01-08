@@ -49,9 +49,9 @@ void LoadSounds(struct AudioEngine *engine)
     struct Audio *sound = NULL;
     sound = LoadSound("resources/assets/audio/background.mp3", MP3);
     aiv_vector_add(engine->sounds, sound);
-    sound = LoadSound("resources/assets/audio/explosion_01.mp3", MP3);
+    sound = LoadSound("resources/assets/audio/snd_explosion1.wav", WAV);
     aiv_vector_add(engine->sounds, sound);
-    sound = LoadSound("resources/assets/audio/explosion_02.mp3", MP3);
+    sound = LoadSound("resources/assets/audio/snd_explosion2.wav", WAV);
     aiv_vector_add(engine->sounds, sound);
 }
 
@@ -63,6 +63,7 @@ struct Audio *LoadSound(char *path, AudioExtension audioExtension)
     {
     case WAV:
         sound->data = (Mix_Chunk *)Mix_LoadWAV(path);
+        Mix_VolumeChunk(sound->data, 50);
         break;
     case MP3:
         sound->data = (Mix_Music *)Mix_LoadMUS(path);

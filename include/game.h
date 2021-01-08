@@ -11,13 +11,13 @@ struct Engine;
 struct EntityComponentSystem;
 struct Game
 {
-    boolean quitRequest;
-    boolean mouseDown;
     float mousePositionX;
     float mousePositionY;
     SceneType sceneToLoad;             //when you want to trigger a scene change (that will happen at the end of the current frame), put here the desired enum value and it will be loaded
     struct Engine* engine;             //the main engine
     struct EntityComponentSystem* ECS; //the ecs system to manage all the entities, their components, and their behaviours in the current scene
+    boolean quitRequest;
+    boolean mouseDown;
 };
 
 struct Game* StartGame();

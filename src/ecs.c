@@ -97,11 +97,11 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         component->data = inputComponent;
         break;
 
-    case ButtonC:
-        ButtonComponent *buttonComponent = (ButtonComponent *)calloc(1, sizeof(ButtonComponent));
+    case UIC:
+        UIComponent *buttonComponent = (UIComponent *)calloc(1, sizeof(UIComponent));
         if (buttonComponent == NULL)
             break;
-        component->type = ButtonC;
+        component->type = UIC;
         component->data = buttonComponent;
         break;
 
