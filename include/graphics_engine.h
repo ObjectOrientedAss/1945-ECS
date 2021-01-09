@@ -2,8 +2,14 @@
 #define GRAPHICS_ENGINE_H
 
 #include <SDL_image.h>
-#include <SDL_ttf.h>
 #include "aiv-vector.h"
+#include "sdl_font_cache.h"
+
+enum f_type
+{
+    Haettenschweiler
+};
+typedef enum f_type FontType;
 
 enum a_type
 {
@@ -30,7 +36,9 @@ enum s_type
     WaterS,
     Island1S,
     Island2S,
-    Island3S
+    Island3S,
+    BottomS,
+    LifeS
 };
 typedef enum s_type SpriteType;
 
@@ -59,6 +67,7 @@ struct GFXEngine
     SDL_Renderer *renderer;
     aiv_vector *spriteSheets;       //all the multi sprite textures are contained here
     aiv_vector *sprites;            //all the single sprite textures are contained here
+    aiv_vector *fonts;              //all the fonts are contained here
 };
 
 void StopGFXEngine(struct GFXEngine* engine);
@@ -69,5 +78,7 @@ void LoadSprites(struct GFXEngine *engine);
 struct GFXEngine *StartGFXEngine();
 struct Sprite GetSprite(struct GFXEngine* engine, SpriteType type);
 struct SpriteSheet GetAnimation(struct GFXEngine* engine, AnimationType type);
+void CreateFonts(struct GFXEngine* engine);
+FC_Font* GetFont(struct GFXEngine* engine, FontType font);
 
 #endif //GRAPHICS_ENGINE_H

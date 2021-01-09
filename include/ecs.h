@@ -18,7 +18,8 @@ typedef enum c_layer CollisionLayer;
 enum c_type
 {
     //------DATA SYSTEMS------//
-    AudioC = -2,
+    TextC = -3,
+    AudioC,
     TransformC,
 
     //^^^^^^DATA SYSTEMS^^^^^^//
@@ -55,6 +56,7 @@ enum e_type
     Particle,
     AudioEmitter,
     SceneManager,
+    Text,
     e_type_last
 };
 typedef enum e_type EntityType;
@@ -169,6 +171,13 @@ typedef struct
     int currentFrameIndex;
     void (*SetAnimation)(struct Component *selfComponent, AnimationType type, float frameDuration);
 } AnimatorComponent;
+
+typedef struct
+{
+    FontType fontType;
+    int size;
+    char* text;
+} TextComponent;
 
 //RENDER COMPONENT BEHAVIOUR: should render the entity sprite
 typedef struct

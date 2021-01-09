@@ -134,7 +134,10 @@ void PhysicsBehaviour(struct Component *selfComponent, struct Game *game)
     {
         physicsComponent->collisionsBlockTimeElapsed += game->engine->time->deltaTimeInSeconds; //the time passed since the last collision
         if (physicsComponent->collisionsBlockTimeElapsed >= physicsComponent->collisionsBlockTime)
+        {
+            physicsComponent->collisionsBlockTimeElapsed = 0;
             physicsComponent->canCollide = true;
+        }
         else
             return;
     }
@@ -216,20 +219,6 @@ void AnimatorBehaviour(struct Component *selfComponent, struct Game *game)
     }
 }
 
-void PlayAudio(struct Component* selfComponent, struct Game *game)
-{
-    AudioComponent* audioComponent = selfComponent->data;
-    switch (audioComponent->audio.audioExtension)
-    {
-    case WAV:
-        Mix_PlayChannel(-1, audioComponent->audio.data, audioComponent->loops);
-        break;
-    case MP3:
-        Mix_PlayMusic(audioComponent->audio.data, audioComponent->loops);
-        break;
-    }
-}
-
 void RenderBehaviour(struct Component *selfComponent, struct Game *game)
 {
     //printf("Render Behaviour Called\n");
@@ -240,6 +229,18 @@ void RenderBehaviour(struct Component *selfComponent, struct Game *game)
     renderComponent->sprite.spriteRect.y = (int)tc->position.y - (int)(renderComponent->sprite.spriteRect.h * 0.5f);
 
     SDL_RenderCopy(renderComponent->renderer, renderComponent->sprite.texture, &renderComponent->sprite.originRect, &renderComponent->sprite.spriteRect);
+}
+
+void FontRenderBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    RenderComponent *renderComponent = (RenderComponent *)selfComponent->data;
+
+    TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
+    renderComponent->sprite.spriteRect.x = (int)tc->position.x - (int)(renderComponent->sprite.spriteRect.w * 0.5f);
+    renderComponent->sprite.spriteRect.y = (int)tc->position.y - (int)(renderComponent->sprite.spriteRect.h * 0.5f);
+
+    TextComponent *textComponent = (TextComponent *)GetComponentData(selfComponent->owner, TextC);
+    FC_Draw(GetFont(game->engine->GfxEngine, textComponent->fontType), renderComponent->renderer, renderComponent->sprite.spriteRect.x, renderComponent->sprite.spriteRect.y, textComponent->text);
 }
 
 void EnemyShootBehaviour(struct Component *selfComponent, struct Game *game)
@@ -318,6 +319,9 @@ void SpawnIslandBehaviour(struct Component *selfComponent, struct Game *game)
         int randomIslandSprite = GetRandomIntBetween(Island3S, Island1S);
         InitRenderComponent(GetComponentData(island, RenderC), game->engine->GfxEngine, randomIslandSprite);
         Enqueue(game->engine->poolsEngine, island);
+
+        struct BattleLevelData *bld = game->levelData;
+        tbc->time = bld->islandSpawnTimer + GetRandomFloatBetween(bld->islandSpawnTimerChanger, -bld->islandSpawnTimerChanger);
     }
 }
 
@@ -332,11 +336,25 @@ void SpawnEnemyBehaviour(struct Component *selfComponent, struct Game *game)
         struct Entity *enemy = Dequeue(game->engine->poolsEngine, Enemy);
         InitTransformComponent(GetComponentData(enemy, TransformC), vec2_new(GetRandomFloatBetween(15.0f, 625.0f), tc->position.y));
         int randomEnemyAnimation = GetRandomIntBetween(Enemy4A, Enemy1A);
-        struct Component* c = GetComponent(enemy, AnimatorC);
-        AnimatorComponent* ac = c->data;
+        struct Component *c = GetComponent(enemy, AnimatorC);
+        AnimatorComponent *ac = c->data;
         ac->SetAnimation(c, randomEnemyAnimation, 0);
+        HealthComponent *hc = GetComponentData(enemy, HealthC);
+        hc->currentHealth = hc->maxHealth;
         SetEntityActiveStatus(enemy, true);
         Enqueue(game->engine->poolsEngine, enemy);
+
+        struct BattleLevelData *bld = game->levelData;
+        tbc->time = bld->islandSpawnTimer + GetRandomFloatBetween(bld->enemySpawnTimerChanger, -bld->enemySpawnTimerChanger);
+
+        int velocityChangeExtraction = GetRandomInt(100);
+        if (velocityChangeExtraction <= bld->enemyOndulationChance)
+        {
+            struct Component *tb = AddComponent(enemy, TimedBehaviourC, OndulationBehaviour);
+            InitTimedBehaviourComponent(tb->data, 10, 0.3f, NULL);
+            //printf("E' successo...");
+        }
+        //printf("NON e' successo...");
     }
 }
 
@@ -348,6 +366,78 @@ void ToggleEntityAfterBehaviour(struct Component *selfComponent, struct Game *ga
     {
         tbc->elapsedTime = 0;
         SetEntityActiveStatus(selfComponent->owner, !selfComponent->owner->active);
+    }
+}
+
+void SpawnEnemySquadronBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)selfComponent->data;
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
+    {
+        tbc->elapsedTime = 0;
+        TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
+
+        struct BattleLevelData *bld = game->levelData;
+        int enemies = GetRandomIntBetween(bld->maxEnemySquadronSize, bld->minEnemySquadronSize);
+        float y = tc->position.y;
+        float x = GetRandomFloatBetween(15.0f, 625.0f);
+        int xDirection = 1;
+        for (int i = 0; i < enemies; i++)
+        {
+            struct Entity *enemy = Dequeue(game->engine->poolsEngine, Enemy);
+            InitTransformComponent(GetComponentData(enemy, TransformC), vec2_new(x, y));
+            int randomEnemyAnimation = GetRandomIntBetween(Enemy4A, Enemy1A);
+            struct Component *c = GetComponent(enemy, AnimatorC);
+            AnimatorComponent *ac = c->data;
+            ac->SetAnimation(c, randomEnemyAnimation, 0);
+            HealthComponent *hc = GetComponentData(enemy, HealthC);
+            hc->currentHealth = hc->maxHealth;
+            SetEntityActiveStatus(enemy, true);
+            Enqueue(game->engine->poolsEngine, enemy);
+            y -= 45;
+            if (x + 45 >= 625 || x - 45 <= 15)
+                xDirection = -xDirection;
+            x += 45 * xDirection;
+        }
+    }
+}
+
+void ScoreDistanceBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)selfComponent->data;
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
+    {
+        tbc->elapsedTime = 0;
+        struct BattleLevelData *bld = game->levelData;
+        bld->score += bld->increaseScore;
+        sprintf(bld->scoreToString, "%d", bld->score);
+        bld->scoreUI->text = bld->scoreToString;
+    }
+}
+
+void OndulationBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)selfComponent->data;
+
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
+    {
+        tbc->elapsedTime = 0;
+        MovementComponent *mc = (MovementComponent *)GetComponentData(selfComponent->owner, MovementC);
+
+        if (mc->velocity.x == 0)
+            mc->velocity.x = 1;
+
+        mc->velocity.x = -mc->velocity.x;
+        tbc->currentRepetitions++;
+        if (tbc->currentRepetitions >= tbc->repetitions)
+        {
+            tbc->currentRepetitions = 0;
+            mc->velocity.x = 0;
+            MarkComponentToDestroy(selfComponent);
+        }
     }
 }
 
@@ -374,6 +464,25 @@ void GoToMainMenuAfter(struct Component *selfComponent, struct Game *game)
     {
         tbc->elapsedTime = 0;
         game->sceneToLoad = MainMenuScene;
+        struct BattleLevelData *bld = game->levelData;
+        aiv_vector_destroy(bld->lives);
+
+        //save high score, if it is beaten
+        FILE* fp = fopen("resources/assets/scores/high_score.txt", "r");
+        char scoreBuffer[5];
+        fgets(scoreBuffer, 5, fp);
+        printf("\nCurent HS: %s", scoreBuffer);
+
+        int currentHighScore = atoi(scoreBuffer);
+        fclose(fp);
+        if(bld->score > currentHighScore)
+        {
+            fp = fopen("resources/assets/scores/high_score.txt", "w");
+            fputs(bld->scoreToString, fp);
+            printf("\nOverwriting high score with new score %s", scoreBuffer);
+        }
+        fclose(fp);
+
         MarkComponentToDestroy(selfComponent);
     }
 }
@@ -419,6 +528,9 @@ void PlayerDeath(struct Component *selfComponent, struct Game *game)
     selfComponent->active = false;
     HealthComponent *healthComponent = (HealthComponent *)selfComponent->data;
     healthComponent->currentLives--;
+    struct BattleLevelData *bld = game->levelData;
+    struct Entity *lifeUI = aiv_vector_at(bld->lives, healthComponent->currentLives);
+    SetEntityActiveStatus(lifeUI, false);
     printf("\nLife lost. Current Lives: %d", healthComponent->currentLives);
     if (healthComponent->currentLives <= 0) //final life spent, goodbye my friend.
     {
@@ -426,6 +538,9 @@ void PlayerDeath(struct Component *selfComponent, struct Game *game)
         SetComponentActiveStatus(rc, false);
 
         struct Component *ic = (struct Component *)GetComponent(selfComponent->owner, InputC);
+        SetComponentActiveStatus(ic, false);
+
+        struct Component *pc = (struct Component *)GetComponent(selfComponent->owner, PhysicsC);
         SetComponentActiveStatus(ic, false);
 
         struct Component *tb = AddComponent(selfComponent->owner, TimedBehaviourC, GoToMainMenuAfter);
@@ -445,7 +560,6 @@ void PlayerDeath(struct Component *selfComponent, struct Game *game)
         movementComponent->velocity = vec2_new(0, 0);
         SetEntityActiveStatus(particle, true);
         Enqueue(game->engine->poolsEngine, particle);
-        //SetEntityActiveStatus(selfComponent->owner, false);
 
         return;
     }
@@ -498,6 +612,11 @@ void EnemyDeath(struct Component *selfComponent, struct Game *game)
     Enqueue(game->engine->poolsEngine, audioEmitter);
     audioComponent->PlayAudio(c, game);
     SetEntityActiveStatus(selfComponent->owner, false);
+
+    struct BattleLevelData *bld = game->levelData;
+    bld->score++;
+    sprintf(bld->scoreToString, "%d", bld->score);
+    bld->scoreUI->text = bld->scoreToString;
 }
 
 void Collide(struct Component *selfComponent, struct Component *otherComponent)
@@ -620,6 +739,20 @@ void SetAudio(struct Component *selfComponent, AudioType type, int loops)
     audioComponent->isPlaying = false;
 }
 
+void PlayAudio(struct Component *selfComponent, struct Game *game)
+{
+    AudioComponent *audioComponent = selfComponent->data;
+    switch (audioComponent->audio.audioExtension)
+    {
+    case WAV:
+        Mix_PlayChannel(-1, audioComponent->audio.data, audioComponent->loops);
+        break;
+    case MP3:
+        Mix_PlayMusic(audioComponent->audio.data, audioComponent->loops);
+        break;
+    }
+}
+
 //COMPONENTS INIT METHODS----------------------------------------------------------------------------------------
 
 void InitTimedBehaviourComponent(TimedBehaviourComponent *timedBehaviourComponent, int repetitions, float time, aiv_vector *customArgs)
@@ -739,5 +872,11 @@ void InitAudioComponent(struct Component *selfComponent, struct AudioEngine *eng
     ac->SetAudio = SetAudio;
     ac->SetAudio(selfComponent, audioType, loops);
     ac->PlayAudio = PlayAudio;
-    printf("\nSO ARIVATO QUA");
+}
+
+void InitTextComponent(TextComponent *textComponent, char *startingText, FontType fontType, int size)
+{
+    textComponent->fontType = fontType;
+    textComponent->size = size;
+    textComponent->text = startingText;
 }

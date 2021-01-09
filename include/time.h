@@ -6,8 +6,8 @@
 typedef struct
 {
     double _frequency;
-    Uint64 _currentCount;
-    Uint64 _lastCount;
+    int _currentCount;
+    int _lastCount;
     double deltaTime;
     double deltaTimeInSeconds;
     int fps;

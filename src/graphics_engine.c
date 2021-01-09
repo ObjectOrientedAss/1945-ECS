@@ -39,11 +39,22 @@ struct GFXEngine *StartGFXEngine()
     engine->sprites = aiv_vector_new();
     LoadSprites(engine);
 
+    if (TTF_Init() == -1)
+    {
+        printf("SDL_TTF Init Failed.");
+        return NULL;
+    }
+    //create the font paths and store them:
+    engine->fonts = aiv_vector_new_with_cap(1);
+    CreateFonts(engine);
+
     return engine;
 }
 
 void StopGFXEngine(struct GFXEngine *engine)
 {
+    TTF_Quit();
+
     //clear the spritesheets lists
     for (uint i = 0; i < aiv_vector_size(engine->spriteSheets); i++)
     {
@@ -61,6 +72,12 @@ void StopGFXEngine(struct GFXEngine *engine)
         free(s);
     }
     aiv_vector_destroy(engine->sprites);
+
+    for (uint i = 0; i < aiv_vector_size(engine->fonts); i++)
+    {
+        FC_FreeFont(aiv_vector_at(engine->fonts, i));
+    }
+    aiv_vector_destroy(engine->fonts);
 
     //quit SDL gfx
     SDL_DestroyRenderer(engine->renderer);
@@ -126,6 +143,10 @@ void LoadSprites(struct GFXEngine *engine)
     aiv_vector_add(engine->sprites, sprite);
     sprite = CreateSprite("resources/assets/map/island3.png", Island3S, engine->renderer);
     aiv_vector_add(engine->sprites, sprite);
+    sprite = CreateSprite("resources/assets/ui/bottom.png", BottomS, engine->renderer);
+    aiv_vector_add(engine->sprites, sprite);
+    sprite = CreateSprite("resources/assets/ui/life.png", LifeS, engine->renderer);
+    aiv_vector_add(engine->sprites, sprite);
 }
 
 struct SpriteSheet *CreateSpriteSheet(char *path, int frames, float baseFrameDuration, AnimationType type, SDL_Renderer *renderer)
@@ -184,4 +205,16 @@ struct SpriteSheet GetAnimation(struct GFXEngine *engine, AnimationType type)
         spriteSheet = aiv_vector_at(engine->spriteSheets, NullAnimation);
     struct SpriteSheet s = *spriteSheet;
     return s;
+}
+
+void CreateFonts(struct GFXEngine* engine)
+{
+    FC_Font* font = FC_CreateFont();
+    FC_LoadFont(font, engine->renderer, "resources/assets/fonts/Haettenschweiler.ttf", 20, FC_MakeColor(255, 255, 255, 255), TTF_STYLE_NORMAL);
+    aiv_vector_add(engine->fonts, font);
+}
+
+FC_Font* GetFont(struct GFXEngine* engine, FontType font)
+{
+    return aiv_vector_at(engine->fonts, font);
 }

@@ -59,6 +59,10 @@ void AddComponents(struct Entity *entity)
         AddComponent(entity, AudioC, NULL);
         AddComponent(entity, TimedBehaviourC, ToggleEntityAfterBehaviour);
         break;
+    case Text:
+        AddComponent(entity, TransformC, NULL);
+        AddComponent(entity, TextC, NULL);
+        AddComponent(entity, RenderC, FontRenderBehaviour);
     }
 }
 
@@ -85,7 +89,7 @@ void LoadMainMenu(struct Game *game)
     AddComponents(audioEmitter);
     InitAudioComponent(GetComponent(audioEmitter, AudioC), game->engine->audioEngine, BackgroundMusic, -1, SetAudio, PlayAudio);
     Mix_VolumeMusic(25);
-    AudioComponent* audioComponent = GetComponentData(audioEmitter, AudioC);
+    AudioComponent *audioComponent = GetComponentData(audioEmitter, AudioC);
     audioComponent->PlayAudio(GetComponent(audioEmitter, AudioC), game);
 
     printf("MAIN MENU SCENE LOADED");
@@ -93,15 +97,48 @@ void LoadMainMenu(struct Game *game)
 
 void LoadGameScene(struct Game *game)
 {
+    struct BattleLevelData *battleLevelData = (struct BattleLevelData *)calloc(1, sizeof(struct BattleLevelData));
+
+    battleLevelData->playerMaxLife = 100.0f;
+    battleLevelData->playerBulletsDamage = 25.0f;
+    battleLevelData->playerShootCooldown = 0.2f;
+    battleLevelData->playerMaxLives = 1;
+    battleLevelData->playerSpeed = 0.3f;
+
+    battleLevelData->enemiesShootCooldown = 0.4f;
+    battleLevelData->enemyBulletsDamage = 10.0f;
+    battleLevelData->enemySpawnTimer = 1.4f;
+    battleLevelData->enemySpawnTimerChanger = 0.4f;
+    battleLevelData->enemyLife = 100.0f;
+    battleLevelData->enemySpeed = 0.2f;
+
+    battleLevelData->bulletSpeed = 0.5f;
+    battleLevelData->islandSpawnTimer = 1.5f;
+    battleLevelData->islandSpawnTimerChanger = 0.3f;
+    battleLevelData->environmentSpeed = 0.1f;
+
+    battleLevelData->enemyKilledScore = 5;
+    battleLevelData->increaseScoreTimer = 0.3f;
+    battleLevelData->increaseScore = 1;
+
+    battleLevelData->minEnemySquadronSize = 3;
+    battleLevelData->maxEnemySquadronSize = 5;
+    battleLevelData->squadronSpawnTimer = 8.0f;
+    battleLevelData->enemyOndulationChance = 70;
+
     //CREATE AND INITIALIZE THE GAME SCENE MANAGER
     struct Entity *sceneManager = CreateEntity(SceneManager, true, game->ECS);
     AddComponents(sceneManager);
     InitTransformComponent(GetComponentData(sceneManager, TransformC), vec2_new(game->engine->GfxEngine->windowWidth * 0.5f, -40));
     struct Component *c = NULL;
     c = AddComponent(sceneManager, TimedBehaviourC, SpawnEnemyBehaviour);
-    InitTimedBehaviourComponent(c->data, -1, 2.0f, NULL);
+    InitTimedBehaviourComponent(c->data, -1, battleLevelData->enemySpawnTimer, NULL);
     c = AddComponent(sceneManager, TimedBehaviourC, SpawnIslandBehaviour);
-    InitTimedBehaviourComponent(c->data, -1, 1.8f, NULL);
+    InitTimedBehaviourComponent(c->data, -1, battleLevelData->islandSpawnTimer, NULL);
+    c = AddComponent(sceneManager, TimedBehaviourC, ScoreDistanceBehaviour);
+    InitTimedBehaviourComponent(c->data, -1, battleLevelData->increaseScoreTimer, NULL);
+    c = AddComponent(sceneManager, TimedBehaviourC, SpawnEnemySquadronBehaviour);
+    InitTimedBehaviourComponent(c->data, -1, battleLevelData->squadronSpawnTimer, NULL);
 
     //CREATE AND INITIALIZE THE WATER BACKGROUNDS TO SWAP
     for (int i = 0; i < 2; i++)
@@ -113,25 +150,25 @@ void LoadGameScene(struct Game *game)
             InitTransformComponent(GetComponentData(waterBackground, TransformC), vec2_new(game->engine->GfxEngine->windowWidth * 0.5f, game->engine->GfxEngine->windowHeight * 0.5f));
         else
             InitTransformComponent(GetComponentData(waterBackground, TransformC), vec2_new(game->engine->GfxEngine->windowWidth * 0.5f, -game->engine->GfxEngine->windowHeight * 0.5f));
-        InitMovementComponent(GetComponentData(waterBackground, MovementC), vec2_new(0, 1), 0.1f);
+        InitMovementComponent(GetComponentData(waterBackground, MovementC), vec2_new(0, 1), battleLevelData->environmentSpeed);
         InitRenderComponent(GetComponentData(waterBackground, RenderC), game->engine->GfxEngine, WaterS);
     }
 
     //CREATE AND INITIALIZE THE ISLANDS
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 15; i++)
     {
         printf("Creating islands...");
         struct Entity *island = CreateEntity(Background, false, game->ECS);
         AddComponents(island);
         AddComponent(island, MovementC, AutomatedMovementBehaviour);
         InitTransformComponent(GetComponentData(island, TransformC), vec2_new(-100, -100));
-        InitMovementComponent(GetComponentData(island, MovementC), vec2_new(0, 1), 0.1f);
+        InitMovementComponent(GetComponentData(island, MovementC), vec2_new(0, 1), battleLevelData->environmentSpeed);
         InitRenderComponent(GetComponentData(island, RenderC), game->engine->GfxEngine, Island1S);
         Enqueue(game->engine->poolsEngine, island);
     }
 
     //CREATE AND POOL THE PARTICLES
-    for (int i = 0; i < 15; i++)
+    for (int i = 0; i < 10; i++)
     {
         printf("Creating particles...");
         struct Entity *particle = CreateEntity(Particle, false, game->ECS);
@@ -145,26 +182,26 @@ void LoadGameScene(struct Game *game)
     }
 
     //CREATE AND POOL THE ENEMY BULLETS
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < 60; i++)
     {
         printf("Creating enemy bullets...");
         struct Entity *enemyBullet = CreateEntity(EnemyBullet, false, game->ECS);
         AddComponents(enemyBullet);
         InitTransformComponent(GetComponentData(enemyBullet, TransformC), vec2_new(-100, -100));
-        InitMovementComponent(GetComponentData(enemyBullet, MovementC), vec2_new(0, 1), 0.2f);
+        InitMovementComponent(GetComponentData(enemyBullet, MovementC), vec2_new(0, 1), battleLevelData->bulletSpeed);
         InitRenderComponent(GetComponentData(enemyBullet, RenderC), game->engine->GfxEngine, EnemyBullet1S);
         InitPhysicsComponent(GetComponent(enemyBullet, PhysicsC), Collide);
         Enqueue(game->engine->poolsEngine, enemyBullet);
     }
 
     //CREATE AND POOL THE PLAYER BULLETS
-    for (int i = 0; i < 25; i++)
+    for (int i = 0; i < 15; i++)
     {
         printf("Creating player bullets...");
         struct Entity *playerBullet = CreateEntity(PlayerBullet, false, game->ECS);
         AddComponents(playerBullet);
         InitTransformComponent(GetComponentData(playerBullet, TransformC), vec2_new(-200, -200));
-        InitMovementComponent(GetComponentData(playerBullet, MovementC), vec2_new(0, -1), 0.2f);
+        InitMovementComponent(GetComponentData(playerBullet, MovementC), vec2_new(0, -1), battleLevelData->bulletSpeed);
         InitRenderComponent(GetComponentData(playerBullet, RenderC), game->engine->GfxEngine, PlayerBulletS);
         InitPhysicsComponent(GetComponent(playerBullet, PhysicsC), Collide);
         Enqueue(game->engine->poolsEngine, playerBullet);
@@ -177,12 +214,12 @@ void LoadGameScene(struct Game *game)
         struct Entity *enemy = CreateEntity(Enemy, false, game->ECS);
         AddComponents(enemy);
         InitTransformComponent(GetComponentData(enemy, TransformC), vec2_new(-100, -100));
-        InitHealthComponent(GetComponentData(enemy, HealthC), 1, 1, 100.0f, 100.0f, ChangeHealth, EnemyDeath);
-        InitMovementComponent(GetComponentData(enemy, MovementC), vec2_new(0, 1), 0.1f);
+        InitHealthComponent(GetComponentData(enemy, HealthC), 1, 1, battleLevelData->enemyLife, battleLevelData->enemyLife, ChangeHealth, EnemyDeath);
+        InitMovementComponent(GetComponentData(enemy, MovementC), vec2_new(0, 1), battleLevelData->enemySpeed);
         InitRenderComponent(GetComponentData(enemy, RenderC), game->engine->GfxEngine, NullSprite);
         InitAnimatorComponent(GetComponent(enemy, AnimatorC), game->engine->GfxEngine, Enemy1A, 0.3f, SetAnimation);
         InitPhysicsComponent(GetComponent(enemy, PhysicsC), Collide);
-        InitShootComponent(GetComponentData(enemy, ShootC), 2.0, EnemyBullet);
+        InitShootComponent(GetComponentData(enemy, ShootC), battleLevelData->enemiesShootCooldown, EnemyBullet);
         Enqueue(game->engine->poolsEngine, enemy);
     }
 
@@ -201,14 +238,41 @@ void LoadGameScene(struct Game *game)
     struct Entity *player = CreateEntity(Player, true, game->ECS);
     AddComponents(player);
     InitTransformComponent(GetComponentData(player, TransformC), vec2_new(game->engine->GfxEngine->windowWidth * 0.5f, game->engine->GfxEngine->windowHeight - 100));
-    InitHealthComponent(GetComponentData(player, HealthC), 4, 2, 1.0f, 1.0f, ChangeHealth, PlayerDeath);
-    InitMovementComponent(GetComponentData(player, MovementC), vec2_new(0, 0), 0.2f);
+    InitHealthComponent(GetComponentData(player, HealthC), battleLevelData->playerMaxLives, battleLevelData->playerMaxLives, battleLevelData->playerMaxLife, battleLevelData->playerMaxLife, ChangeHealth, PlayerDeath);
+    InitMovementComponent(GetComponentData(player, MovementC), vec2_new(0, 0), battleLevelData->playerSpeed);
     InitRenderComponent(GetComponentData(player, RenderC), game->engine->GfxEngine, NullSprite);
     InitAnimatorComponent(GetComponent(player, AnimatorC), game->engine->GfxEngine, PlayerA, 0.3f, SetAnimation);
     InitPhysicsComponent(GetComponent(player, PhysicsC), Collide);
-    InitShootComponent(GetComponentData(player, ShootC), 0.35f, PlayerBullet);
+    InitShootComponent(GetComponentData(player, ShootC), battleLevelData->playerShootCooldown, PlayerBullet);
 
+    battleLevelData->player = player;
+
+    struct Entity *bottomUI = CreateEntity(Background, true, game->ECS);
+    AddComponents(bottomUI);
+    InitTransformComponent(GetComponentData(bottomUI, TransformC), vec2_new(game->engine->GfxEngine->windowWidth * 0.5f, game->engine->GfxEngine->windowHeight - 38));
+    InitRenderComponent(GetComponentData(bottomUI, RenderC), game->engine->GfxEngine, BottomS);
     printf("GAME SCENE LOADED");
+    game->levelData = battleLevelData;
+
+    int x = 35;
+    int y = 425;
+    battleLevelData->lives = aiv_vector_new_with_cap(battleLevelData->playerMaxLives);
+    for (int i = 0; i < battleLevelData->playerMaxLives; i++)
+    {
+        struct Entity *playerLifeUI = CreateEntity(Background, true, game->ECS);
+        AddComponents(playerLifeUI);
+        InitTransformComponent(GetComponentData(playerLifeUI, TransformC), vec2_new(x, y));
+        InitRenderComponent(GetComponentData(playerLifeUI, RenderC), game->engine->GfxEngine, LifeS);
+        aiv_vector_add(battleLevelData->lives, playerLifeUI);
+        x += 30;
+    }
+
+    struct Entity *scoreUI = CreateEntity(Text, true, game->ECS);
+    AddComponents(scoreUI);
+    InitTransformComponent(GetComponentData(scoreUI, TransformC), vec2_new(95, 455));
+    InitRenderComponent(GetComponentData(scoreUI, RenderC), game->engine->GfxEngine, NullSprite);
+    InitTextComponent(GetComponentData(scoreUI, TextC), "0", Haettenschweiler, 18);
+    battleLevelData->scoreUI = GetComponentData(scoreUI, TextC);
 }
 
 int GetRandomInt(int max)
@@ -304,6 +368,7 @@ void GameLoop(struct Game *game)
         {
             game->ECS = ECSReset(game->ECS);
             game->engine->poolsEngine = PoolsReset(game->engine->poolsEngine);
+            free(game->levelData);
             LoadScene(game->engine->scenesEngine, game, game->sceneToLoad);
             game->sceneToLoad = None;
         }

@@ -34,6 +34,9 @@
     <ClCompile Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\src\scenes_engine.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\src\sdl_font_cache.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\src\time.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -76,6 +79,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\scenes_engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\sdl_font_cache.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\time.h">

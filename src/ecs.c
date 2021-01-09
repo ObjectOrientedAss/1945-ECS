@@ -59,6 +59,7 @@ struct Entity *CreateEntity(EntityType type, boolean activateImmediately, struct
 }
 
 //ADDS THE SPECIFIED COMPONENT TO THE ENTITY.
+//TODO: remove game as param it is useless.
 struct Component *AddComponent(struct Entity *entity, ComponentType componentType, void (*behaviour)(struct Component *selfComponent, struct Game *game))
 {
     struct Component *component = (struct Component *)calloc(1, sizeof(struct Component));
@@ -151,6 +152,14 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
             break;
         component->type = RenderC;
         component->data = renderComponent;
+        break;
+
+    case TextC:
+        TextComponent *textComponent = (TextComponent *)calloc(1, sizeof(TextComponent));
+        if (textComponent == NULL)
+            break;
+        component->type = TextC;
+        component->data = textComponent;
         break;
     }
 

@@ -11,9 +11,12 @@
 void AlphaBlendingBehaviour(struct Component *selfComponent, struct Game *game);
 void SpawnIslandBehaviour(struct Component *selfComponent, struct Game *game);
 void SpawnEnemyBehaviour(struct Component *selfComponent, struct Game *game);
+void SpawnEnemySquadronBehaviour(struct Component *selfComponent, struct Game *game);
 void ToggleEntityAfterBehaviour(struct Component *selfComponent, struct Game *game);
 void PlayerTimedRespawnBehaviour(struct Component *selfComponent, struct Game *game);
+void ScoreDistanceBehaviour(struct Component *selfComponent, struct Game *game);
 void GoToMainMenuAfter(struct Component *selfComponent, struct Game *game);
+void OndulationBehaviour(struct Component *selfComponent, struct Game *game);
 //INPUT COMPONENT
 void InputBehaviour(struct Component *selfComponent, struct Game* game);
 //SHOOT COMPONENT
@@ -33,6 +36,7 @@ void HealthBehaviour(struct Component *selfComponent, struct Game* game);
 void AnimatorBehaviour(struct Component *selfComponent, struct Game* game);
 //RENDER COMPONENT
 void RenderBehaviour(struct Component *selfComponent, struct Game* game);
+void FontRenderBehaviour(struct Component *selfComponent, struct Game *game);
 
 //COMPONENTS INNER METHODS (Custom)---------------------------------------------------------------------------------------
 
@@ -50,6 +54,7 @@ void PlayAudio(struct Component *selfComponent, struct Game *game);
 
 //COMPONENTS INIT METHODS (Awake)----------------------------------------------------------------------------------------
 
+void InitTextComponent(TextComponent* textComponent, char* startingText, FontType fontType, int size);
 void InitTimedBehaviourComponent(TimedBehaviourComponent *timedBehaviourComponent, int repetitions, float time, aiv_vector* customArgs);
 void InitParticleComponent(struct Component* selfComponent, void(*PlayParticle)(AnimationType type));
 void InitShootComponent(ShootComponent* selfComponent, float shootCooldown, EntityType bulletType);

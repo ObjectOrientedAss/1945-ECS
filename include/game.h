@@ -7,10 +7,49 @@
 #include "behaviours.h"
 #include <stdlib.h>
 
+struct BattleLevelData
+{
+    struct Entity* player;      //reference to the player entity
+    TextComponent* scoreUI;     //reference to the score UI text component
+    aiv_vector* lives;          //reference to the lives entity in the ui
+
+    double islandSpawnTimer;
+    double islandSpawnTimerChanger;
+
+    double enemySpawnTimer;
+    double enemySpawnTimerChanger;
+    double enemiesShootCooldown;
+    float enemyBulletsDamage;
+    float enemySpeed;
+    float enemyLife;
+
+    float playerMaxLife;
+    float playerSpeed;
+    float playerBulletsDamage;
+    double playerShootCooldown;
+    int playerMaxLives;
+
+    float environmentSpeed;
+    float bulletSpeed;
+
+    int enemyKilledScore;
+    double increaseScoreTimer;
+    int increaseScore;
+    int score;
+
+    double squadronSpawnTimer;
+    int minEnemySquadronSize;
+    int maxEnemySquadronSize;
+    int enemyOndulationChance;
+
+    char scoreToString[5];
+};
+
 struct Engine;
 struct EntityComponentSystem;
 struct Game
 {
+    void* levelData;
     float mousePositionX;
     float mousePositionY;
     SceneType sceneToLoad;             //when you want to trigger a scene change (that will happen at the end of the current frame), put here the desired enum value and it will be loaded

@@ -11,24 +11,9 @@ struct ScenesEngine
     aiv_vector* scenes;
 };
 
-struct SceneData
-{
-    void* data;
-    void (*InitializeGameData)(struct GameSceneData* gameSceneData);
-};
-
-struct GameSceneData
-{
-    struct Entity* player;
-    aiv_vector* lives;
-    double enemySpawnTimer;
-    double islandSpawnTimer;
-};
-
 struct Game;
 struct Scene
 {
-    struct SceneData* sceneData;
     void(*Load)(struct Game* game);
     SceneType type;
 };
