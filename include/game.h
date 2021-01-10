@@ -1,11 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "scenes_engine.h"
 #include "core_engine.h"
-#include "ecs.h"
-#include "behaviours.h"
-#include <stdlib.h>
 
 struct MainMenuLevelData
 {
@@ -15,8 +11,8 @@ struct MainMenuLevelData
 struct BattleLevelData
 {
     struct Entity* player;      //reference to the player entity
-    TextComponent* scoreUI;     //reference to the score UI text component
-    TextComponent* powerupUI;     //reference to the score UI text component
+    struct TextComponent* scoreUI;     //reference to the score UI text component
+    struct TextComponent* powerupUI;     //reference to the score UI text component
     aiv_vector* lives;          //reference to the lives entity in the ui
 
     double islandSpawnTimer;

@@ -2,8 +2,7 @@
 #define POOLS_ENGINE_H
 
 #include "queue.h"
-#include "aiv-vector.h"
-#include "ecs.h"
+#include "entity.h"
 
 struct PoolsEngine
 {
@@ -12,7 +11,7 @@ struct PoolsEngine
 
 struct PoolsEngine* StartPoolsEngine();
 void CreatePools(struct PoolsEngine* engine);
-queue* GetPool(struct PoolsEngine* engine, EntityFamily poolFamily);
+struct Queue* GetPool(struct PoolsEngine* engine, EntityFamily poolFamily);
 void DestroyPoolsEngine(struct PoolsEngine* engine);
 struct PoolsEngine* PoolsReset(struct PoolsEngine* engine);
 void Enqueue(struct PoolsEngine* engine, struct Entity* entity);

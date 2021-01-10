@@ -5,50 +5,52 @@
 #include <stdlib.h>
 #include "common.h"
 
-typedef struct _data {
+struct QueueData
+{
 	void * data;
-	struct _data * next;
-}data;
+	struct QueueData * next;
+};
 
-typedef struct _queue {
+struct Queue
+{
 	size_t size;
 	//size_t allocationSize;
-	data* head;
-	data* tail;
-}queue;
+	struct QueueData* head;
+	struct QueueData* tail;
+};
 
 /*
 Create and return an empty queue
 */
-queue* createQueue(/*size_t allocSize*/);
+struct Queue* createQueue(/*size_t allocSize*/);
 /*
 Insert data into the queue(last position)
 */
-void enqueue(queue * q, void* data);
+void enqueue(struct Queue * q, void* data);
 /*
 Remove first element of the queue of save its value to the toRet argument
 */
-void* dequeue(queue * q);
+void* dequeue(struct Queue * q);
 /*
 Save first element of the queue to the toRet argument
 */
-void front(queue*q, void *toRet);//Return the first element
+void front(struct Queue*q, void *toRet);//Return the first element
 /*
 Deletes all data of the queue
 */
-void clearQueue(queue* q);
+void clearQueue(struct Queue* q);
 /*
 Clears and destoys the queue
 */
-void destroyQueue(queue *q);
+void destroyQueue(struct Queue *q);
 /*
 Return size of the queue
 */
-size_t getSize(queue *q);
+size_t getSize(struct Queue *q);
 /*
 Check is queue is empty
 */
-boolean isEmpty(queue * q);
+boolean isEmpty(struct Queue * q);
 
 
 #endif

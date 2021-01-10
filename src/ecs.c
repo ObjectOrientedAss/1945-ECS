@@ -68,7 +68,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
     switch (componentType)
     {
     case TimedBehaviourC:
-        TimedBehaviourComponent *timedBehaviourComponent = (TimedBehaviourComponent *)calloc(1, sizeof(TimedBehaviourComponent));
+        struct TimedBehaviourComponent *timedBehaviourComponent = calloc(1, sizeof(struct TimedBehaviourComponent));
         if (timedBehaviourComponent == NULL)
             break;
         component->type = TimedBehaviourC;
@@ -76,7 +76,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         break;
 
     case ShootC:
-        ShootComponent *shootComponent = (ShootComponent *)calloc(1, sizeof(ShootComponent));
+        struct ShootComponent *shootComponent = calloc(1, sizeof(struct ShootComponent));
         if (shootComponent == NULL)
             break;
         component->type = ShootC;
@@ -84,7 +84,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         break;
 
     case TransformC:
-        TransformComponent *transformComponent = (TransformComponent *)calloc(1, sizeof(TransformComponent));
+        struct TransformComponent *transformComponent = calloc(1, sizeof(struct TransformComponent));
         if (transformComponent == NULL)
             break;
         component->type = TransformC;
@@ -92,7 +92,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         break;
 
     case InputC:
-        InputComponent *inputComponent = (InputComponent *)calloc(1, sizeof(InputComponent));
+        struct InputComponent *inputComponent = calloc(1, sizeof(struct InputComponent));
         if (inputComponent == NULL)
             break;
         component->type = InputC;
@@ -100,7 +100,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         break;
 
     case UIC:
-        UIComponent *buttonComponent = (UIComponent *)calloc(1, sizeof(UIComponent));
+        struct UIComponent *buttonComponent = calloc(1, sizeof(struct UIComponent));
         if (buttonComponent == NULL)
             break;
         component->type = UIC;
@@ -108,7 +108,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         break;
 
     case MovementC:
-        MovementComponent *movementComponent = (MovementComponent *)calloc(1, sizeof(MovementComponent));
+        struct MovementComponent *movementComponent = calloc(1, sizeof(struct MovementComponent));
         if (movementComponent == NULL)
             break;
         component->type = MovementC;
@@ -116,7 +116,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         break;
 
     case PhysicsC:
-        PhysicsComponent *physicsComponent = (PhysicsComponent *)calloc(1, sizeof(PhysicsComponent));
+        struct PhysicsComponent *physicsComponent = calloc(1, sizeof(struct PhysicsComponent));
         if (physicsComponent == NULL)
             break;
         component->type = PhysicsC;
@@ -124,7 +124,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         break;
 
     case HealthC:
-        HealthComponent *healthComponent = (HealthComponent *)calloc(1, sizeof(HealthComponent));
+        struct HealthComponent *healthComponent = calloc(1, sizeof(struct HealthComponent));
         if (healthComponent == NULL)
             break;
         component->type = HealthC;
@@ -132,7 +132,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         break;
 
     case AnimatorC:
-        AnimatorComponent *animatorComponent = (AnimatorComponent *)calloc(1, sizeof(AnimatorComponent));
+        struct AnimatorComponent *animatorComponent = calloc(1, sizeof(struct AnimatorComponent));
         if (animatorComponent == NULL)
             break;
         component->type = AnimatorC;
@@ -140,7 +140,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         break;
 
     case AudioC:
-        AudioComponent *audioComponent = (AudioComponent *)calloc(1, sizeof(AudioComponent));
+        struct AudioComponent *audioComponent = calloc(1, sizeof(struct AudioComponent));
         if (audioComponent == NULL)
             break;
         component->type = AudioC;
@@ -148,7 +148,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         break;
 
     case RenderC:
-        RenderComponent *renderComponent = (RenderComponent *)calloc(1, sizeof(RenderComponent));
+        struct RenderComponent *renderComponent = calloc(1, sizeof(struct RenderComponent));
         if (renderComponent == NULL)
             break;
         component->type = RenderC;
@@ -156,7 +156,7 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         break;
 
     case TextC:
-        TextComponent *textComponent = (TextComponent *)calloc(1, sizeof(TextComponent));
+        struct TextComponent *textComponent = calloc(1, sizeof(struct TextComponent));
         if (textComponent == NULL)
             break;
         component->type = TextC;

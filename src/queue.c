@@ -1,9 +1,9 @@
 #include "queue.h"
 #include <string.h>
 
-queue *createQueue()
+struct Queue *createQueue()
 {
-	queue *q = (queue *)calloc(1, sizeof(queue));
+	struct Queue *q = calloc(1, sizeof(struct Queue));
 	if (q == NULL)
 	{
 		return NULL;
@@ -14,7 +14,7 @@ queue *createQueue()
 	return q;
 }
 
-void enqueue(queue *q, void *_data)
+void enqueue(struct Queue *q, void *_data)
 {
 	if (q == NULL)
 		printf("Enqueue Error: Queue can't be null");
@@ -22,7 +22,7 @@ void enqueue(queue *q, void *_data)
 	if (_data == NULL)
 		printf("Enqueue Error: Data is NULL.");
 
-	data *d = (data *)calloc(1, sizeof(data));
+	struct QueueData *d = calloc(1, sizeof(struct QueueData));
 	d->data = _data;
 	d->next = NULL;
 
@@ -39,7 +39,7 @@ void enqueue(queue *q, void *_data)
 	q->size++;
 }
 
-void *dequeue(queue *q)
+void *dequeue(struct Queue *q)
 {
 	if(q == NULL)
 		printf("Dequeue Error: Queue is NULL");
@@ -51,13 +51,13 @@ void *dequeue(queue *q)
 	if (q->size == 1)
 	{
 		//free(q->head);
-		data* oldHead = q->head;
+		struct QueueData* oldHead = q->head;
 		q->head = q->tail = NULL;
 		free(oldHead);
 	}
 	else
 	{
-		data* oldHead = q->head;
+		struct QueueData* oldHead = q->head;
 		//free(q->head);
 		q->head = q->head->next;
 		free(oldHead);
@@ -68,7 +68,7 @@ void *dequeue(queue *q)
 	return temp;
 }
 
-void clearQueue(queue *q)
+void clearQueue(struct Queue *q)
 {
 	if (q == NULL)
 	{
@@ -78,14 +78,14 @@ void clearQueue(queue *q)
 
 	while (!isEmpty(q))
 	{
-		data *temp = q->head;
+		struct QueueData *temp = q->head;
 		q->head = q->head->next;
 		free(temp);
 		q->size--;
 	}
 }
 
-size_t getSize(queue *q)
+size_t getSize(struct Queue *q)
 {
 	if (q == NULL)
 	{
@@ -96,7 +96,7 @@ size_t getSize(queue *q)
 	return q->size;
 }
 
-boolean isEmpty(queue *q)
+boolean isEmpty(struct Queue *q)
 {
 	if (q == NULL)
 	{
@@ -112,7 +112,7 @@ boolean isEmpty(queue *q)
 	}
 }
 
-void destroyQueue(queue *q)
+void destroyQueue(struct Queue *q)
 {
 	clearQueue(q);
 	free(q);

@@ -12,14 +12,14 @@ void CreatePools(struct PoolsEngine* engine)
 {
     for (int i = 0; i < (int)e_family_last; i++)
     {
-        queue* pool = createQueue();
+        struct Queue* pool = createQueue();
         aiv_vector_add(engine->pools, pool);
     }
 }
 
-queue* GetPool(struct PoolsEngine* engine, EntityFamily poolType)
+struct Queue* GetPool(struct PoolsEngine* engine, EntityFamily poolType)
 {
-    queue* queue = aiv_vector_at(engine->pools, poolType);
+    struct Queue* queue = aiv_vector_at(engine->pools, poolType);
     return queue;
 }
 
@@ -27,7 +27,7 @@ void DestroyPoolsEngine(struct PoolsEngine* engine)
 {
     for (uint i = 0; i < aiv_vector_size(engine->pools); i++)
     {
-        queue* pool = (queue*)aiv_vector_at(engine->pools, i);
+        struct Queue* pool = aiv_vector_at(engine->pools, i);
         destroyQueue(pool);
     }
     aiv_vector_destroy(engine->pools);
@@ -42,12 +42,12 @@ struct PoolsEngine* PoolsReset(struct PoolsEngine* engine)
 
 void Enqueue(struct PoolsEngine* engine, struct Entity* entity)
 {
-    queue* q = GetPool(engine, (int)entity->family);
+    struct Queue* q = GetPool(engine, (int)entity->family);
     enqueue(q, entity);
 }
 
 struct Entity* Dequeue(struct PoolsEngine* engine, EntityFamily poolType)
 {
-    queue* q = GetPool(engine, poolType);
+    struct Queue* q = GetPool(engine, poolType);
     return (struct Entity*)dequeue(q);
 }

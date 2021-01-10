@@ -102,7 +102,7 @@ void LoadMainMenu(struct Game *game)
     AddComponents(audioEmitter);
     InitAudioComponent(GetComponent(audioEmitter, AudioC), game->engine->audioEngine, BackgroundMusic, -1, SetAudio, PlayAudio);
     Mix_VolumeMusic(5);
-    AudioComponent *audioComponent = GetComponentData(audioEmitter, AudioC);
+    struct AudioComponent *audioComponent = GetComponentData(audioEmitter, AudioC);
     audioComponent->PlayAudio(GetComponent(audioEmitter, AudioC), game);
 
     printf("MAIN MENU SCENE LOADED");
