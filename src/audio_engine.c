@@ -63,7 +63,7 @@ struct Audio *LoadSound(char *path, AudioExtension audioExtension)
     {
     case WAV:
         sound->data = (Mix_Chunk *)Mix_LoadWAV(path);
-        Mix_VolumeChunk(sound->data, 50);
+        Mix_VolumeChunk(sound->data, 3);
         break;
     case MP3:
         sound->data = (Mix_Music *)Mix_LoadMUS(path);

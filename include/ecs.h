@@ -8,10 +8,11 @@
 
 enum c_layer
 {
-    PLAYER_COLLISION_LAYER = 0x00000001,
-    ENEMY_COLLISION_LAYER = 0x00000002,
-    PLAYERBULLET_COLLISION_LAYER = 0x00000004,
-    ENEMYBULLET_COLLISION_LAYER = 0x00000008
+    PLAYER_COLLISION_LAYER = 0x01,
+    ENEMY_COLLISION_LAYER = 0x02,
+    PLAYERBULLET_COLLISION_LAYER = 0x04,
+    ENEMYBULLET_COLLISION_LAYER = 0x08,
+    POWERUP_COLLISION_LAYER = 0x10
 };
 typedef enum c_layer CollisionLayer;
 
@@ -47,19 +48,36 @@ typedef enum c_type ComponentType;
 
 enum e_type
 {
-    Background,
-    Button,
-    Player,
-    Enemy,
-    PlayerBullet,
-    EnemyBullet,
+    NoType = -1,
+    UI,
+    Airplane,
+    Bullet,
     Particle,
-    AudioEmitter,
-    SceneManager,
-    Text,
+    Audio,
+    Powerup,
     e_type_last
 };
 typedef enum e_type EntityType;
+
+enum e_family
+{
+    NoFamily = -1,
+    PlayerAirplane,
+    EnemyAirplane,
+    PlayerBullet,
+    EnemyBullet,
+    SmokeParticle,
+    ExplosionParticle,
+    SpeedPowerup,
+    AttackPowerup,
+    LifePowerup,
+    Image,
+    Button,
+    Text,
+    AudioEmitter,
+    e_family_last
+};
+typedef enum e_family EntityFamily;
 
 //ALL EXISTING COMPONENTS:
 struct EntityComponentSystem
@@ -73,7 +91,8 @@ struct EntityComponentSystem
 struct Entity
 {
     uint __entityIndex;                //the index of this entity in the entities list of ECS, useful to find it or remove it immediately
-    EntityType type;                   //useful to help categorizing this entity and uniform some behaviours on it, like premade components to be attached all at once in creation
+    EntityType type;                   //useful to help macro-categorizing this entity and uniform some behaviours on it, like premade components to be attached all at once in creation
+    EntityFamily family;               //useful to help specific-categorizing this entity and define it for specific behaviours
     aiv_vector *components;            //the list containing all the behaviours attached to this entity
     boolean active;                    //if this is true, the behaviours of this entity's system components CAN be called, else not
     boolean markedToDestroy;           //if this is true, the entity will be destroyed at the end of the current frame with all its components
@@ -146,7 +165,7 @@ typedef struct
     float colliderRadius;  //the collision radius of this component
     float collisionsBlockTime; //the time that must pass before this component will be able to collide again
     float collisionsBlockTimeElapsed; //the time passed since the last collision
-    void (*Collide)(struct Component *selfComponent, struct Component *otherComponent);
+    void (*Collide)(struct Component *selfComponent, struct Component *otherComponent, struct Game* game);
     boolean canCollide;    //has this collider collided in this frame?
 } PhysicsComponent;
 
@@ -171,13 +190,6 @@ typedef struct
     int currentFrameIndex;
     void (*SetAnimation)(struct Component *selfComponent, AnimationType type, float frameDuration);
 } AnimatorComponent;
-
-typedef struct
-{
-    FontType fontType;
-    int size;
-    char* text;
-} TextComponent;
 
 //RENDER COMPONENT BEHAVIOUR: should render the entity sprite
 typedef struct
@@ -207,12 +219,19 @@ typedef struct
     boolean isPlaying;
 } AudioComponent;
 
+typedef struct
+{
+    FontType fontType;
+    int size;
+    char* text;
+} TextComponent;
+
 //-----END OF DATA SYSTEMS-----//
 
 struct EntityComponentSystem *ECSInit();
 void DestroyECS(struct EntityComponentSystem *ECS);
 struct EntityComponentSystem* ECSReset(struct EntityComponentSystem* ECS);
-struct Entity *CreateEntity(EntityType type, boolean activateImmediately, struct EntityComponentSystem *ECS);
+struct Entity *CreateEntity(EntityType type, EntityFamily family, boolean activateImmediately, struct EntityComponentSystem *ECS);
 struct Component *AddComponent(struct Entity *entity, ComponentType type, void (*behaviour)(struct Component *selfComponent, struct Game* game));
 struct Component *GetComponent(struct Entity *entity, ComponentType type);
 void *GetComponentData(struct Entity *entity, ComponentType type);

@@ -12,10 +12,10 @@ struct PoolsEngine
 
 struct PoolsEngine* StartPoolsEngine();
 void CreatePools(struct PoolsEngine* engine);
-queue* GetPool(struct PoolsEngine* engine, EntityType poolType);
+queue* GetPool(struct PoolsEngine* engine, EntityFamily poolFamily);
 void DestroyPoolsEngine(struct PoolsEngine* engine);
 struct PoolsEngine* PoolsReset(struct PoolsEngine* engine);
 void Enqueue(struct PoolsEngine* engine, struct Entity* entity);
-struct Entity* Dequeue(struct PoolsEngine* engine, EntityType poolType);
+struct Entity* Dequeue(struct PoolsEngine* engine, EntityFamily poolFamily);
 
 #endif //POOLS_ENGINE_H

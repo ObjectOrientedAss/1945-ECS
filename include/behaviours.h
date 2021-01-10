@@ -9,6 +9,9 @@
 
 //TIMED COMPONENT
 void AlphaBlendingBehaviour(struct Component *selfComponent, struct Game *game);
+void ReleaseSmokeBehaviour(struct Component *selfComponent, struct Game *game);
+void DetachPowerupBehaviour(struct Component *selfComponent, struct Game *game);
+void SpawnPowerupBehaviour(struct Component *selfComponent, struct Game *game);
 void SpawnIslandBehaviour(struct Component *selfComponent, struct Game *game);
 void SpawnEnemyBehaviour(struct Component *selfComponent, struct Game *game);
 void SpawnEnemySquadronBehaviour(struct Component *selfComponent, struct Game *game);
@@ -25,6 +28,7 @@ void PlayerShootBehaviour(struct Component* selfComponent, struct Game* game);
 //BUTTON COMPONENT
 void UIBehaviour(struct Component *selfComponent, struct Game* game);
 //MOVEMENT COMPONENT
+void ParticleMovementBehaviour(struct Component *selfComponent, struct Game *game);
 void WaterMovementBehaviour(struct Component* selfComponent, struct Game* game);
 void PlayerMovementBehaviour(struct Component *selfComponent, struct Game* game);
 void AutomatedMovementBehaviour(struct Component *selfComponent, struct Game* game);
@@ -42,7 +46,7 @@ void FontRenderBehaviour(struct Component *selfComponent, struct Game *game);
 
 void PlayerDeath(struct Component* selfComponent, struct Game* game);
 void EnemyDeath(struct Component* selfComponent, struct Game* game);
-void Collide(struct Component *selfComponent, struct Component *otherComponent);
+void Collide(struct Component *selfComponent, struct Component *otherComponent, struct Game* game);
 void ChangeHealth(HealthComponent *selfComponent, float amount);
 void SetAnimation(struct Component *selfComponent, AnimationType type, float frameDuration);
 void ButtonHoverStart(struct Component* selfComponent);
@@ -60,7 +64,7 @@ void InitParticleComponent(struct Component* selfComponent, void(*PlayParticle)(
 void InitShootComponent(ShootComponent* selfComponent, float shootCooldown, EntityType bulletType);
 void InitMovementComponent(MovementComponent* movementComponent, vec2 velocity, float speed);
 void InitUIComponent(struct Component* buttonComponent, void(*OnClick)(struct Component* selfComponent, struct Game* game), void(*OnHoverStart)(struct Component *selfComponent), void(*OnHoverEnd)(struct Component *selfComponent));
-void InitPhysicsComponent(struct Component *selfComponent, void (*Collide)(struct Component* selfComponent, struct Component* otherComponent));
+void InitPhysicsComponent(struct Component *selfComponent, void (*Collide)(struct Component* selfComponent, struct Component* otherComponent, struct Game* game));
 void InitRenderComponent(RenderComponent *renderComponent, struct GFXEngine *engine, SpriteType spriteType);
 void InitAnimatorComponent(struct Component *animatorComponent, struct GFXEngine *engine, AnimationType animationType, float frameDuration, void (*SetAnimation)(struct Component *selfComponent, AnimationType type, float frameDuration));
 void InitAudioComponent(struct Component *selfComponent, struct AudioEngine *engine, AudioType audioType, int loops, void (*SetAudio)(struct Component* selfComponent, AudioType type, int loops), void (*PlayAudio)(struct Component *selfComponent, struct Game *game));

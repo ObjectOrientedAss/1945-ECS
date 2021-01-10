@@ -147,6 +147,12 @@ void LoadSprites(struct GFXEngine *engine)
     aiv_vector_add(engine->sprites, sprite);
     sprite = CreateSprite("resources/assets/ui/life.png", LifeS, engine->renderer);
     aiv_vector_add(engine->sprites, sprite);
+    sprite = CreateSprite("resources/assets/player/attack_powerup.png", AttackPowerupS, engine->renderer);
+    aiv_vector_add(engine->sprites, sprite);
+    sprite = CreateSprite("resources/assets/player/speed_powerup.png", SpeedPowerupS, engine->renderer);
+    aiv_vector_add(engine->sprites, sprite);
+    sprite = CreateSprite("resources/assets/player/life_powerup.png", LifePowerupS, engine->renderer);
+    aiv_vector_add(engine->sprites, sprite);
 }
 
 struct SpriteSheet *CreateSpriteSheet(char *path, int frames, float baseFrameDuration, AnimationType type, SDL_Renderer *renderer)
@@ -184,6 +190,8 @@ void LoadSpriteSheets(struct GFXEngine *engine)
     spriteSheet = CreateSpriteSheet("resources/assets/player/myplane_strip3.png", 3, 0.3f, PlayerA, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
     spriteSheet = CreateSpriteSheet("resources/assets/player/explosion2_strip7.png", 7, 0.1f, PlayerExplosionA, engine->renderer);
+    aiv_vector_add(engine->spriteSheets, spriteSheet);
+    spriteSheet = CreateSpriteSheet("resources/assets/player/smoke_strip10.png", 10, 0.2f, SmokeA, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
 }
 

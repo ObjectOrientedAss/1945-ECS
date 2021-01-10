@@ -45,11 +45,12 @@ void DestroyECS(struct EntityComponentSystem *ECS)
     free(ECS);
 }
 
-struct Entity *CreateEntity(EntityType type, boolean activateImmediately, struct EntityComponentSystem *ECS)
+struct Entity *CreateEntity(EntityType type, EntityFamily family, boolean activateImmediately, struct EntityComponentSystem *ECS)
 {
     struct Entity *entity = calloc(1, sizeof(struct Entity));
     entity->components = aiv_vector_new_with_cap(1);
     entity->type = type;
+    entity->family = family;
     entity->markedToDestroy = false;
     entity->active = activateImmediately;
     entity->ECS = ECS;

@@ -1437,7 +1437,6 @@ void FC_ClearFont(FC_Font* font)
     FC_Init(font);
 }
 
-
 void FC_FreeFont(FC_Font* font)
 {
     int i;

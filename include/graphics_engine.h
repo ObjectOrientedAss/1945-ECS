@@ -20,7 +20,8 @@ enum a_type
     Enemy4A,
     EnemyExplosionA,
     PlayerA,
-    PlayerExplosionA
+    PlayerExplosionA,
+    SmokeA
 };
 typedef enum a_type AnimationType;
 
@@ -38,7 +39,10 @@ enum s_type
     Island2S,
     Island3S,
     BottomS,
-    LifeS
+    LifeS,
+    AttackPowerupS,
+    SpeedPowerupS,
+    LifePowerupS
 };
 typedef enum s_type SpriteType;
 

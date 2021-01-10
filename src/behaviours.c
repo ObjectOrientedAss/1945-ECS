@@ -103,8 +103,8 @@ void PlayerMovementBehaviour(struct Component *selfComponent, struct Game *game)
 
     if (tc->position.y < 0)
         tc->position.y = 0;
-    else if (tc->position.y > game->engine->GfxEngine->windowHeight)
-        tc->position.y = game->engine->GfxEngine->windowHeight;
+    else if (tc->position.y > game->engine->GfxEngine->windowHeight - 76)
+        tc->position.y = game->engine->GfxEngine->windowHeight - 76;
 }
 
 void AutomatedMovementBehaviour(struct Component *selfComponent, struct Game *game)
@@ -122,6 +122,16 @@ void AutomatedMovementBehaviour(struct Component *selfComponent, struct Game *ga
         SetEntityActiveStatus(selfComponent->owner, false);
         //printf("DISATTIVATA ENTITY NUMERO %d ALLE COORDINATE:    %f  |  %f", selfComponent->owner->__entityIndex, tc->position.x, tc->position.y);
     }
+}
+
+void ParticleMovementBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    //printf("Enemy Behaviour Called\n");
+    MovementComponent *movementComponent = (MovementComponent *)selfComponent->data;
+    TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
+
+    tc->position.x += movementComponent->velocity.x * movementComponent->speed * game->engine->time->deltaTime;
+    tc->position.y += movementComponent->velocity.y * movementComponent->speed * game->engine->time->deltaTime;
 }
 
 void PhysicsBehaviour(struct Component *selfComponent, struct Game *game)
@@ -175,10 +185,10 @@ void PhysicsBehaviour(struct Component *selfComponent, struct Game *game)
                 //printf("\n\n---------     COLLISION HAPPENED BETWEEN %d AND %d!", selfComponent->owner->type, otherComponent->owner->type);
                 //handle the collision on me:
                 physicsComponent->canCollide = false;
-                physicsComponent->Collide(selfComponent, otherComponent);
+                physicsComponent->Collide(selfComponent, otherComponent, game);
                 //trigger and handle the collision on the other:
                 otherPhysicsComponent->canCollide = false;
-                otherPhysicsComponent->Collide(otherComponent, selfComponent);
+                otherPhysicsComponent->Collide(otherComponent, selfComponent, game);
                 break; //i just want to be able to collide once per frame, so after colliding, stop checking collisions on this object!
             }
         }
@@ -303,6 +313,53 @@ void PlayerShootBehaviour(struct Component *selfComponent, struct Game *game)
     }
 }
 
+void SpawnPowerupBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)selfComponent->data;
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
+    {
+        tbc->elapsedTime = 0;
+        TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
+        int powerupType = GetRandomIntBetween(AttackPowerup, SpeedPowerup);
+        struct Entity *powerup = Dequeue(game->engine->poolsEngine, powerupType);
+        InitTransformComponent(GetComponentData(powerup, TransformC), vec2_new(GetRandomFloatBetween(30.0f, 620.0f), tc->position.y));
+        SetEntityActiveStatus(powerup, true);
+        Enqueue(game->engine->poolsEngine, powerup);
+
+        struct BattleLevelData *bld = game->levelData;
+        tbc->time = bld->powerupSpawnTimer + GetRandomFloatBetween(bld->powerupSpawnTimerChanger, -bld->powerupSpawnTimerChanger);
+    }
+}
+
+void DetachSpeedPowerupBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)selfComponent->data;
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
+    {
+        tbc->elapsedTime = 0;
+        struct BattleLevelData *bld = game->levelData;
+        bld->playerSpeed /= bld->speedPowerupBonus;
+        bld->powerupUI->text = "";
+        MarkComponentToDestroy(selfComponent);
+    }
+}
+
+void DetachAttackPowerupBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)selfComponent->data;
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
+    {
+        tbc->elapsedTime = 0;
+        struct BattleLevelData *bld = game->levelData;
+        bld->playerBulletsDamage /= bld->attackPowerupBonus;
+        bld->powerupUI->text = "";
+        MarkComponentToDestroy(selfComponent);
+    }
+}
+
 void SpawnIslandBehaviour(struct Component *selfComponent, struct Game *game)
 {
     TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)selfComponent->data;
@@ -311,7 +368,7 @@ void SpawnIslandBehaviour(struct Component *selfComponent, struct Game *game)
     {
         tbc->elapsedTime = 0;
         TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
-        struct Entity *island = Dequeue(game->engine->poolsEngine, Background);
+        struct Entity *island = Dequeue(game->engine->poolsEngine, Image);
         InitTransformComponent(GetComponentData(island, TransformC), vec2_new(GetRandomFloatBetween(30.0f, 620.0f), tc->position.y));
         SetEntityActiveStatus(island, true);
 
@@ -333,7 +390,7 @@ void SpawnEnemyBehaviour(struct Component *selfComponent, struct Game *game)
     {
         tbc->elapsedTime = 0;
         TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
-        struct Entity *enemy = Dequeue(game->engine->poolsEngine, Enemy);
+        struct Entity *enemy = Dequeue(game->engine->poolsEngine, EnemyAirplane);
         InitTransformComponent(GetComponentData(enemy, TransformC), vec2_new(GetRandomFloatBetween(15.0f, 625.0f), tc->position.y));
         int randomEnemyAnimation = GetRandomIntBetween(Enemy4A, Enemy1A);
         struct Component *c = GetComponent(enemy, AnimatorC);
@@ -341,20 +398,26 @@ void SpawnEnemyBehaviour(struct Component *selfComponent, struct Game *game)
         ac->SetAnimation(c, randomEnemyAnimation, 0);
         HealthComponent *hc = GetComponentData(enemy, HealthC);
         hc->currentHealth = hc->maxHealth;
+        MovementComponent *mc = GetComponentData(enemy, MovementC);
+        mc->velocity.x = 0;
         SetEntityActiveStatus(enemy, true);
         Enqueue(game->engine->poolsEngine, enemy);
 
         struct BattleLevelData *bld = game->levelData;
         tbc->time = bld->islandSpawnTimer + GetRandomFloatBetween(bld->enemySpawnTimerChanger, -bld->enemySpawnTimerChanger);
 
+        //if the ondulation behaviour was active, turn it off
+        struct Component *ondulationBehaviour = GetComponent(enemy, TimedBehaviourC);
+        SetComponentActiveStatus(ondulationBehaviour, false);
+
+        //now, if the chance is good, activate it
         int velocityChangeExtraction = GetRandomInt(100);
         if (velocityChangeExtraction <= bld->enemyOndulationChance)
         {
-            struct Component *tb = AddComponent(enemy, TimedBehaviourC, OndulationBehaviour);
-            InitTimedBehaviourComponent(tb->data, 10, 0.3f, NULL);
-            //printf("E' successo...");
+            TimedBehaviourComponent *tbc = ondulationBehaviour->data;
+            printf("\nTBC on spawn elapsedtime: %f repetitions: %d", tbc->elapsedTime, tbc->currentRepetitions);
+            SetComponentActiveStatus(ondulationBehaviour, true);
         }
-        //printf("NON e' successo...");
     }
 }
 
@@ -369,6 +432,35 @@ void ToggleEntityAfterBehaviour(struct Component *selfComponent, struct Game *ga
     }
 }
 
+void ReleaseSmokeBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)selfComponent->data;
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
+    {
+        tbc->elapsedTime = 0;
+        HealthComponent *hc = GetComponentData(selfComponent->owner, HealthC);
+        {
+            if (hc->currentHealth <= hc->maxHealth * 0.25f)
+            {
+                TransformComponent *transformComponent = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
+
+                //release two smoke particles behind the plane...
+                struct Entity *particle = Dequeue(game->engine->poolsEngine, SmokeParticle);
+                TransformComponent *particleTransformComponent = (TransformComponent *)GetComponentData(particle, TransformC);
+                particleTransformComponent->position = vec2_new(transformComponent->position.x - 15, transformComponent->position.y + 10);
+                SetEntityActiveStatus(particle, true);
+                Enqueue(game->engine->poolsEngine, particle);
+                particle = Dequeue(game->engine->poolsEngine, SmokeParticle);
+                particleTransformComponent = (TransformComponent *)GetComponentData(particle, TransformC);
+                particleTransformComponent->position = vec2_new(transformComponent->position.x + 15, transformComponent->position.y + 10);
+                SetEntityActiveStatus(particle, true);
+                Enqueue(game->engine->poolsEngine, particle);
+            }
+        }
+    }
+}
+
 void SpawnEnemySquadronBehaviour(struct Component *selfComponent, struct Game *game)
 {
     TimedBehaviourComponent *tbc = (TimedBehaviourComponent *)selfComponent->data;
@@ -377,15 +469,22 @@ void SpawnEnemySquadronBehaviour(struct Component *selfComponent, struct Game *g
     {
         tbc->elapsedTime = 0;
         TransformComponent *tc = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
-
         struct BattleLevelData *bld = game->levelData;
         int enemies = GetRandomIntBetween(bld->maxEnemySquadronSize, bld->minEnemySquadronSize);
         float y = tc->position.y;
         float x = GetRandomFloatBetween(15.0f, 625.0f);
         int xDirection = 1;
+
         for (int i = 0; i < enemies; i++)
         {
-            struct Entity *enemy = Dequeue(game->engine->poolsEngine, Enemy);
+            struct Entity *enemy = Dequeue(game->engine->poolsEngine, EnemyAirplane);
+
+            //if the ondulation behaviour was active, turn it off, we don't want the squadrons to ondulate
+            MovementComponent *mc = GetComponentData(enemy, MovementC);
+            mc->velocity.x = 0;
+            struct Component *ondulationBehaviour = GetComponent(enemy, TimedBehaviourC);
+            SetComponentActiveStatus(ondulationBehaviour, false);
+
             InitTransformComponent(GetComponentData(enemy, TransformC), vec2_new(x, y));
             int randomEnemyAnimation = GetRandomIntBetween(Enemy4A, Enemy1A);
             struct Component *c = GetComponent(enemy, AnimatorC);
@@ -431,12 +530,12 @@ void OndulationBehaviour(struct Component *selfComponent, struct Game *game)
             mc->velocity.x = 1;
 
         mc->velocity.x = -mc->velocity.x;
-        tbc->currentRepetitions++;
+
         if (tbc->currentRepetitions >= tbc->repetitions)
         {
             tbc->currentRepetitions = 0;
-            mc->velocity.x = 0;
-            MarkComponentToDestroy(selfComponent);
+            //mc->velocity.x = 0;
+            SetComponentActiveStatus(selfComponent, false);
         }
     }
 }
@@ -468,14 +567,14 @@ void GoToMainMenuAfter(struct Component *selfComponent, struct Game *game)
         aiv_vector_destroy(bld->lives);
 
         //save high score, if it is beaten
-        FILE* fp = fopen("resources/assets/scores/high_score.txt", "r");
+        FILE *fp = fopen("resources/assets/scores/high_score.txt", "r");
         char scoreBuffer[5];
         fgets(scoreBuffer, 5, fp);
         printf("\nCurent HS: %s", scoreBuffer);
 
         int currentHighScore = atoi(scoreBuffer);
         fclose(fp);
-        if(bld->score > currentHighScore)
+        if (bld->score > currentHighScore)
         {
             fp = fopen("resources/assets/scores/high_score.txt", "w");
             fputs(bld->scoreToString, fp);
@@ -541,7 +640,10 @@ void PlayerDeath(struct Component *selfComponent, struct Game *game)
         SetComponentActiveStatus(ic, false);
 
         struct Component *pc = (struct Component *)GetComponent(selfComponent->owner, PhysicsC);
-        SetComponentActiveStatus(ic, false);
+        SetComponentActiveStatus(pc, false);
+
+        struct Component *sc = (struct Component *)GetComponent(selfComponent->owner, ShootC);
+        SetComponentActiveStatus(sc, false);
 
         struct Component *tb = AddComponent(selfComponent->owner, TimedBehaviourC, GoToMainMenuAfter);
         InitTimedBehaviourComponent(tb->data, 1, 3.0f, NULL);
@@ -549,7 +651,7 @@ void PlayerDeath(struct Component *selfComponent, struct Game *game)
         TransformComponent *transformComponent = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
         MovementComponent *movementComponent = (MovementComponent *)GetComponentData(selfComponent->owner, MovementC);
 
-        struct Entity *particle = Dequeue(game->engine->poolsEngine, Particle);
+        struct Entity *particle = Dequeue(game->engine->poolsEngine, ExplosionParticle);
         TransformComponent *otherTransformComponent = (TransformComponent *)GetComponentData(particle, TransformC);
         MovementComponent *otherMovementComponent = (MovementComponent *)GetComponentData(particle, MovementC);
 
@@ -588,7 +690,7 @@ void PlayerDeath(struct Component *selfComponent, struct Game *game)
 void EnemyDeath(struct Component *selfComponent, struct Game *game)
 {
     //spawn particle
-    struct Entity *particle = Dequeue(game->engine->poolsEngine, Particle);
+    struct Entity *particle = Dequeue(game->engine->poolsEngine, ExplosionParticle);
     TransformComponent *transformComponent = (TransformComponent *)GetComponentData(selfComponent->owner, TransformC);
     MovementComponent *movementComponent = (MovementComponent *)GetComponentData(selfComponent->owner, MovementC);
 
@@ -611,59 +713,114 @@ void EnemyDeath(struct Component *selfComponent, struct Game *game)
     SetEntityActiveStatus(audioEmitter, true);
     Enqueue(game->engine->poolsEngine, audioEmitter);
     audioComponent->PlayAudio(c, game);
-    SetEntityActiveStatus(selfComponent->owner, false);
 
+    //increase score
     struct BattleLevelData *bld = game->levelData;
     bld->score++;
     sprintf(bld->scoreToString, "%d", bld->score);
     bld->scoreUI->text = bld->scoreToString;
+
+    //spawn life power up, if you're lucky
+    float lifePowerUpExtraction = GetRandomFloat(100.0f);
+    if (lifePowerUpExtraction <= bld->lifePowerupSpawnChance)
+    {
+        struct Entity *powerup = Dequeue(game->engine->poolsEngine, LifePowerup);
+        InitTransformComponent(GetComponentData(powerup, TransformC), transformComponent->position);
+        SetEntityActiveStatus(powerup, true);
+        Enqueue(game->engine->poolsEngine, powerup);
+        //movementComponent->velocity.x = 0; //reset x velocity in case this enemy was using an ondulation component while alive
+    }
+
+    SetEntityActiveStatus(selfComponent->owner, false);
 }
 
-void Collide(struct Component *selfComponent, struct Component *otherComponent)
+void Collide(struct Component *selfComponent, struct Component *otherComponent, struct Game *game)
 {
     //get my physics component
     PhysicsComponent *selfPhysicsComponent = (PhysicsComponent *)selfComponent->data;
     //get other physics component
     PhysicsComponent *otherPhysicsComponent = (PhysicsComponent *)otherComponent->data;
 
+    struct BattleLevelData *bld = game->levelData;
+
     switch (selfComponent->owner->type)
     {
-    case Player:
-        if (otherComponent->owner->type == Enemy)
+    case Airplane: //i am an airplane
+        switch (selfComponent->owner->family)
         {
-            HealthComponent *healthComponent = (HealthComponent *)GetComponentData(selfComponent->owner, HealthC);
-            healthComponent->ChangeHealth(healthComponent, -50.0f);
-            printf("\nPlayer health: %f", healthComponent->currentHealth);
-        }
-        else if (otherComponent->owner->type == EnemyBullet)
-        {
-            HealthComponent *healthComponent = (HealthComponent *)GetComponentData(selfComponent->owner, HealthC);
-            healthComponent->ChangeHealth(healthComponent, -15.0f);
-            printf("\nPlayer health: %f", healthComponent->currentHealth);
+        case PlayerAirplane:                                    //specifically, i am a player airplane
+            if (otherComponent->owner->family == EnemyAirplane) //other is an enemy airplane
+            {
+                HealthComponent *healthComponent = (HealthComponent *)GetComponentData(selfComponent->owner, HealthC);
+                healthComponent->ChangeHealth(healthComponent, -bld->playerSuicideDamage);
+                printf("\nPlayer health: %f", healthComponent->currentHealth);
+            }
+            else if (otherComponent->owner->family == EnemyBullet) //other is an enemy bullet
+            {
+                HealthComponent *healthComponent = (HealthComponent *)GetComponentData(selfComponent->owner, HealthC);
+                healthComponent->ChangeHealth(healthComponent, -bld->enemyBulletsDamage);
+                printf("\nPlayer health: %f", healthComponent->currentHealth);
+            }
+            else if (otherComponent->owner->family == AttackPowerup) //other is an attack pu
+            {
+                //attack powerup attach
+                bld->playerBulletsDamage *= bld->attackPowerupBonus;
+                struct Component *tb = AddComponent(selfComponent->owner, TimedBehaviourC, DetachAttackPowerupBehaviour);
+                InitTimedBehaviourComponent(tb->data, 1, bld->powerupDuration, NULL);
+                bld->powerupUI->text = "Increased Attack!";
+            }
+            else if (otherComponent->owner->family == SpeedPowerup) //other is a speed pu
+            {
+                //speed powerup attach
+                bld->playerSpeed *= bld->speedPowerupBonus;
+                struct Component *tb = AddComponent(selfComponent->owner, TimedBehaviourC, DetachSpeedPowerupBehaviour);
+                InitTimedBehaviourComponent(tb->data, 1, bld->powerupDuration, NULL);
+                bld->powerupUI->text = "Increased Speed!";
+            }
+            else if (otherComponent->owner->family == LifePowerup) //other is a life pu
+            {
+                HealthComponent *healthComponent = (HealthComponent *)GetComponentData(selfComponent->owner, HealthC);
+                if (healthComponent->currentLives < healthComponent->maxLives)
+                {
+                    struct Entity *lifeUI = aiv_vector_at(bld->lives, healthComponent->currentLives);
+                    SetEntityActiveStatus(lifeUI, true);
+                    healthComponent->currentLives++;
+                    printf("\nLife gained. Current Lives: %d", healthComponent->currentLives);
+                }
+            }
+            break;
+        case EnemyAirplane:                                      //specifically i am an enemy airplane
+            if (otherComponent->owner->family == PlayerAirplane) //other is a player airplane
+            {
+                HealthComponent *healthComponent = (HealthComponent *)GetComponentData(selfComponent->owner, HealthC);
+                healthComponent->ChangeHealth(healthComponent, -healthComponent->maxHealth);
+                printf("\nEnemy health: %f", healthComponent->currentHealth);
+            }
+            else if (otherComponent->owner->family == PlayerBullet) //other is a player bullet
+            {
+                HealthComponent *healthComponent = (HealthComponent *)GetComponentData(selfComponent->owner, HealthC);
+                healthComponent->ChangeHealth(healthComponent, -bld->playerBulletsDamage);
+                printf("\nEnemy health: %f", healthComponent->currentHealth);
+            }
+            break;
         }
         break;
-    case Enemy:
-        if (otherComponent->owner->type == Player)
+    case Bullet:
+        switch (selfComponent->owner->family)
         {
-            HealthComponent *healthComponent = (HealthComponent *)GetComponentData(selfComponent->owner, HealthC);
-            healthComponent->ChangeHealth(healthComponent, -healthComponent->maxHealth);
-            printf("\nEnemy health: %f", healthComponent->currentHealth);
-        }
-        else if (otherComponent->owner->type == PlayerBullet)
-        {
-            HealthComponent *healthComponent = (HealthComponent *)GetComponentData(selfComponent->owner, HealthC);
-            healthComponent->ChangeHealth(healthComponent, -35.0f);
-            printf("\nEnemy health: %f", healthComponent->currentHealth);
+        case PlayerBullet:
+            if (otherComponent->owner->family == EnemyAirplane)
+                SetEntityActiveStatus(selfComponent->owner, false);
+            break;
+        case EnemyBullet:
+            if (otherComponent->owner->family == PlayerAirplane)
+                SetEntityActiveStatus(selfComponent->owner, false);
+            break;
         }
         break;
-    case PlayerBullet:
-        if (otherComponent->owner->type == Enemy)
+    case Powerup:
+        if (otherComponent->owner->family == PlayerAirplane)
             SetEntityActiveStatus(selfComponent->owner, false);
-        break;
-    case EnemyBullet:
-        if (otherComponent->owner->type == Player)
-            SetEntityActiveStatus(selfComponent->owner, false);
-        break;
     }
 }
 
@@ -799,7 +956,7 @@ void InitUIComponent(struct Component *selfComponent, void (*OnClick)(struct Com
     printf("\n---Button Component Initialized!");
 }
 
-void InitPhysicsComponent(struct Component *selfComponent, void (*Collide)(struct Component *selfComponent, struct Component *otherComponent))
+void InitPhysicsComponent(struct Component *selfComponent, void (*Collide)(struct Component *selfComponent, struct Component *otherComponent, struct Game *game))
 {
     PhysicsComponent *physicsComponent = (PhysicsComponent *)selfComponent->data;
     RenderComponent *renderComponent = (RenderComponent *)GetComponentData(selfComponent->owner, RenderC);
@@ -811,17 +968,17 @@ void InitPhysicsComponent(struct Component *selfComponent, void (*Collide)(struc
     physicsComponent->canCollide = true;
     physicsComponent->Collide = Collide;
 
-    physicsComponent->collisionsBlockTime = 0.5f;
+    physicsComponent->collisionsBlockTime = 0.08f;
     physicsComponent->collisionsBlockTimeElapsed = 0;
 
     //COLLISION MASKS ORDER: EnemyBullet, PlayerBullet, Enemy, Player -> TODO: use the enum to make the bitmask.
-    switch (selfComponent->owner->type)
+    switch (selfComponent->owner->family)
     {
-    case Player:
-        physicsComponent->layersBitmask = ENEMY_COLLISION_LAYER | ENEMYBULLET_COLLISION_LAYER;
+    case PlayerAirplane:
+        physicsComponent->layersBitmask = ENEMY_COLLISION_LAYER | ENEMYBULLET_COLLISION_LAYER | POWERUP_COLLISION_LAYER;
         physicsComponent->selfLayer = PLAYER_COLLISION_LAYER;
         break;
-    case Enemy:
+    case EnemyAirplane:
         physicsComponent->layersBitmask = PLAYER_COLLISION_LAYER | PLAYERBULLET_COLLISION_LAYER;
         physicsComponent->selfLayer = ENEMYBULLET_COLLISION_LAYER;
         break;
@@ -833,6 +990,15 @@ void InitPhysicsComponent(struct Component *selfComponent, void (*Collide)(struc
         physicsComponent->layersBitmask = PLAYER_COLLISION_LAYER;
         physicsComponent->selfLayer = ENEMYBULLET_COLLISION_LAYER;
         break;
+    case SpeedPowerup:
+        physicsComponent->layersBitmask = PLAYER_COLLISION_LAYER;
+        physicsComponent->selfLayer = POWERUP_COLLISION_LAYER;
+    case AttackPowerup:
+        physicsComponent->layersBitmask = PLAYER_COLLISION_LAYER;
+        physicsComponent->selfLayer = POWERUP_COLLISION_LAYER;
+    case LifePowerup:
+        physicsComponent->layersBitmask = PLAYER_COLLISION_LAYER;
+        physicsComponent->selfLayer = POWERUP_COLLISION_LAYER;
     }
 
     printf("\n---Physics Component Initialized!");

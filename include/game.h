@@ -7,10 +7,16 @@
 #include "behaviours.h"
 #include <stdlib.h>
 
+struct MainMenuLevelData
+{
+    char highScoreToString[5];
+};
+
 struct BattleLevelData
 {
     struct Entity* player;      //reference to the player entity
     TextComponent* scoreUI;     //reference to the score UI text component
+    TextComponent* powerupUI;     //reference to the score UI text component
     aiv_vector* lives;          //reference to the lives entity in the ui
 
     double islandSpawnTimer;
@@ -41,6 +47,14 @@ struct BattleLevelData
     int minEnemySquadronSize;
     int maxEnemySquadronSize;
     int enemyOndulationChance;
+
+    float lifePowerupSpawnChance;
+    double powerupSpawnTimer;
+    double powerupSpawnTimerChanger;
+    double powerupDuration;
+    int speedPowerupBonus;
+    int attackPowerupBonus;
+    float playerSuicideDamage;
 
     char scoreToString[5];
 };
