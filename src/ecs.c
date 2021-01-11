@@ -171,7 +171,6 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
         component->active = true;
         component->behaviour = behaviour;
         aiv_vector_add(entity->components, component);
-        //printf("\nEntity Components Vector---\ncomponent %d added at position %d", (int)component->type, aiv_vector_size(entity->components) - 1);
         AddToSystems(component);
         return component;
     }
@@ -184,11 +183,9 @@ struct Component *AddComponent(struct Entity *entity, ComponentType componentTyp
 //RETURNS NULL IF THE COMPONENT IS NOT FOUND.
 struct Component *GetComponent(struct Entity *entity, ComponentType type)
 {
-    //printf("\n---Looking for %d component type", type);
     for (uint i = 0; i < entity->components->__count; i++)
     {
         struct Component *c = aiv_vector_at(entity->components, i);
-        //printf("\nComponent %d type is %d", i, c->type);
         if (c->type == type)
             return c;
     }
@@ -237,19 +234,12 @@ void MarkEntityToDestroy(struct Entity *entity)
 
 void DestroyComponent(struct Component *component)
 {
-    // int componentType = component->type;
-    // int ownerType = component->owner->type;
-    // int componentIndex = component->__systemIndex;
-    // int ownerIndex = component->__systemIndex;
-
     //THIS IS TOTALLY UNOPTIMIZED! REMOVE ALL AT ONCE!
-    //printf("\n- Removing component of type %d with systemindex %d from entity of type %d with entityindex %d", componentType, componentIndex, ownerType, ownerIndex);
     RemoveFromSystems(component);
     //---
-    //printf("\n%d", component->owner->__entityIndex);
+
     free(component->data);
     free(component);
-    //printf("   -   Succesfully removed!");
 }
 
 void DestroyEntity(struct Entity *entity)
@@ -289,7 +279,6 @@ void AddToSystems(struct Component *component)
         aiv_vector *system = aiv_vector_at(component->owner->ECS->systems, (uint)component->type);
         component->__systemIndex = aiv_vector_size(system);
         aiv_vector_add(system, component);
-        //printf("\n||| Component of type %d has been added to the relative ECS system |||", component->type);
     }
 }
 
@@ -327,11 +316,9 @@ void UnregisterEntity(struct Entity *entity)
 void SetEntityActiveStatus(struct Entity *entity, boolean active)
 {
     entity->active = active;
-    //printf("Entity %d active status: %d", entity->type, active);
 }
 
 void SetComponentActiveStatus(struct Component *component, boolean active)
 {
     component->active = active;
-    //printf("Component %d active status: %d", component->type, active);
 }

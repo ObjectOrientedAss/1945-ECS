@@ -2,7 +2,6 @@
 
 void AnimatorBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    //printf("Animator Behaviour Called\n");
     struct AnimatorComponent *animatorComponent = (struct AnimatorComponent*)selfComponent->data;
 
     if (animatorComponent->currentAnimation.frames <= 1) //if an asshole has created an animation spritesheet with 1 or less frames...
@@ -51,6 +50,4 @@ void InitAnimatorComponent(struct Component *selfComponent, struct GFXEngine *en
     animatorComponent->engine = engine;
     animatorComponent->SetAnimation = SetAnimation;
     animatorComponent->SetAnimation(selfComponent, animationType, frameDuration);
-    // printf("AF Width: %d | AF Height: %d\n", animatorComponent->currentAnimation.frameWidth, animatorComponent->currentAnimation.frameHeight);
-    printf("\n---Animator Component Initialized!");
 }

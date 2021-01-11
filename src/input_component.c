@@ -2,11 +2,8 @@
 
 void InputBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    //printf("Input Behaviour Called\n");
     struct InputComponent *inputComponent = selfComponent->data;
     const Uint8 *state = SDL_GetKeyboardState(NULL);
-
-    //inputComponent->shoot = false;
 
     //horizontal input
     if (state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A])

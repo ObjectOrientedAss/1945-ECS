@@ -15,7 +15,7 @@ void InitPhysicsComponent(struct Component *selfComponent, void (*Collide)(struc
     physicsComponent->collisionsBlockTime = 0.08f;
     physicsComponent->collisionsBlockTimeElapsed = 0;
 
-    //COLLISION MASKS ORDER: EnemyBullet, PlayerBullet, Enemy, Player -> TODO: use the enum to make the bitmask.
+    //SETUP COLLISION MASKS
     switch (selfComponent->owner->family)
     {
     case PlayerAirplane:
@@ -24,13 +24,21 @@ void InitPhysicsComponent(struct Component *selfComponent, void (*Collide)(struc
         break;
     case EnemyAirplane:
         physicsComponent->layersBitmask = PLAYER_COLLISION_LAYER | PLAYERBULLET_COLLISION_LAYER;
-        physicsComponent->selfLayer = ENEMYBULLET_COLLISION_LAYER;
+        physicsComponent->selfLayer = ENEMY_COLLISION_LAYER;
+        break;
+    case BossAirplane:
+        physicsComponent->layersBitmask = PLAYER_COLLISION_LAYER | PLAYERBULLET_COLLISION_LAYER;
+        physicsComponent->selfLayer = ENEMY_COLLISION_LAYER;
         break;
     case PlayerBullet:
         physicsComponent->layersBitmask = ENEMY_COLLISION_LAYER;
         physicsComponent->selfLayer = PLAYERBULLET_COLLISION_LAYER;
         break;
     case EnemyBullet:
+        physicsComponent->layersBitmask = PLAYER_COLLISION_LAYER;
+        physicsComponent->selfLayer = ENEMYBULLET_COLLISION_LAYER;
+        break;
+    case BossBullet:
         physicsComponent->layersBitmask = PLAYER_COLLISION_LAYER;
         physicsComponent->selfLayer = ENEMYBULLET_COLLISION_LAYER;
         break;
@@ -44,8 +52,6 @@ void InitPhysicsComponent(struct Component *selfComponent, void (*Collide)(struc
         physicsComponent->layersBitmask = PLAYER_COLLISION_LAYER;
         physicsComponent->selfLayer = POWERUP_COLLISION_LAYER;
     }
-
-    printf("\n---Physics Component Initialized!");
 }
 
 void Collide(struct Component *selfComponent, struct Component *otherComponent, struct Game *game)
@@ -67,13 +73,21 @@ void Collide(struct Component *selfComponent, struct Component *otherComponent, 
             {
                 struct HealthComponent *healthComponent = GetComponentData(selfComponent->owner, HealthC);
                 healthComponent->ChangeHealth(healthComponent, -bld->playerSuicideDamage);
-                printf("\nPlayer health: %f", healthComponent->currentHealth);
+            }
+            else if (otherComponent->owner->family == BossAirplane) //other is an enemy airplane
+            {
+                struct HealthComponent *healthComponent = GetComponentData(selfComponent->owner, HealthC);
+                healthComponent->ChangeHealth(healthComponent, -bld->playerSuicideDamage);
             }
             else if (otherComponent->owner->family == EnemyBullet) //other is an enemy bullet
             {
                 struct HealthComponent *healthComponent = GetComponentData(selfComponent->owner, HealthC);
                 healthComponent->ChangeHealth(healthComponent, -bld->enemyBulletsDamage);
-                printf("\nPlayer health: %f", healthComponent->currentHealth);
+            }
+            else if (otherComponent->owner->family == BossBullet)
+            {
+                struct HealthComponent *healthComponent = GetComponentData(selfComponent->owner, HealthC);
+                healthComponent->ChangeHealth(healthComponent, -bld->bossBulletsDamage);
             }
             else if (otherComponent->owner->family == AttackPowerup) //other is an attack pu
             {
@@ -99,7 +113,6 @@ void Collide(struct Component *selfComponent, struct Component *otherComponent, 
                     struct Entity *lifeUI = aiv_vector_at(bld->lives, healthComponent->currentLives);
                     SetEntityActiveStatus(lifeUI, true);
                     healthComponent->currentLives++;
-                    printf("\nLife gained. Current Lives: %d", healthComponent->currentLives);
                 }
             }
             break;
@@ -108,13 +121,18 @@ void Collide(struct Component *selfComponent, struct Component *otherComponent, 
             {
                 struct HealthComponent *healthComponent = GetComponentData(selfComponent->owner, HealthC);
                 healthComponent->ChangeHealth(healthComponent, -healthComponent->maxHealth);
-                printf("\nEnemy health: %f", healthComponent->currentHealth);
             }
             else if (otherComponent->owner->family == PlayerBullet) //other is a player bullet
             {
                 struct HealthComponent *healthComponent = GetComponentData(selfComponent->owner, HealthC);
                 healthComponent->ChangeHealth(healthComponent, -bld->playerBulletsDamage);
-                printf("\nEnemy health: %f", healthComponent->currentHealth);
+            }
+            break;
+        case BossAirplane:                                     //specifically i am an enemy airplane
+            if (otherComponent->owner->family == PlayerBullet) //other is a player bullet
+            {
+                struct HealthComponent *healthComponent = GetComponentData(selfComponent->owner, HealthC);
+                healthComponent->ChangeHealth(healthComponent, -bld->playerBulletsDamage);
             }
             break;
         }
@@ -123,10 +141,14 @@ void Collide(struct Component *selfComponent, struct Component *otherComponent, 
         switch (selfComponent->owner->family)
         {
         case PlayerBullet:
-            if (otherComponent->owner->family == EnemyAirplane)
+            if (otherComponent->owner->family == EnemyAirplane || otherComponent->owner->family == BossAirplane)
                 SetEntityActiveStatus(selfComponent->owner, false);
             break;
         case EnemyBullet:
+            if (otherComponent->owner->family == PlayerAirplane)
+                SetEntityActiveStatus(selfComponent->owner, false);
+            break;
+        case BossBullet:
             if (otherComponent->owner->family == PlayerAirplane)
                 SetEntityActiveStatus(selfComponent->owner, false);
             break;
@@ -140,7 +162,6 @@ void Collide(struct Component *selfComponent, struct Component *otherComponent, 
 
 void PhysicsBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    //printf("Physics Behaviour Called\n");
     //get my physics component
     struct PhysicsComponent *physicsComponent = selfComponent->data;
 
@@ -177,7 +198,6 @@ void PhysicsBehaviour(struct Component *selfComponent, struct Game *game)
         //check if the collision layers are compatible
         if ((physicsComponent->selfLayer & otherPhysicsComponent->layersBitmask))
         {
-            //printf("\n----Type %d can collide with Type %d", selfComponent->owner->type, otherComponent->owner->type);
             //get the other transform component and relative position
             struct TransformComponent *otherTransformComponent = GetComponentData(otherComponent->owner, TransformC);
             //get the distance vector between me and the other
@@ -186,7 +206,6 @@ void PhysicsBehaviour(struct Component *selfComponent, struct Game *game)
             //if the distance is less than the two colliders radiuses combined, we are colliding on each other
             if (vec2_magn(&vDist) <= physicsComponent->colliderRadius + otherPhysicsComponent->colliderRadius)
             {
-                //printf("\n\n---------     COLLISION HAPPENED BETWEEN %d AND %d!", selfComponent->owner->type, otherComponent->owner->type);
                 //handle the collision on me:
                 physicsComponent->canCollide = false;
                 physicsComponent->Collide(selfComponent, otherComponent, game);

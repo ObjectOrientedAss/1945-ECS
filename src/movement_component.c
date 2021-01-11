@@ -1,8 +1,44 @@
 #include "movement_component.h"
 
+void BossEntranceMovementBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    struct MovementComponent *movementComponent = selfComponent->data;
+    struct TransformComponent *tc = GetComponentData(selfComponent->owner, TransformC);
+
+    tc->position.x += movementComponent->velocity.x * movementComponent->speed * game->engine->time->deltaTime;
+    tc->position.y += movementComponent->velocity.y * movementComponent->speed * game->engine->time->deltaTime;
+
+    if (tc->position.y >= 50)
+    {
+        tc->position.y = 50;
+        movementComponent->velocity.y = 0;
+        movementComponent->velocity.x = 1;
+        selfComponent->behaviour = BossFightMovementBehaviour;
+    }
+}
+
+void BossFightMovementBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    struct MovementComponent *movementComponent = selfComponent->data;
+    struct TransformComponent *tc = GetComponentData(selfComponent->owner, TransformC);
+
+    tc->position.x += movementComponent->velocity.x * movementComponent->speed * game->engine->time->deltaTime;
+    tc->position.y += movementComponent->velocity.y * movementComponent->speed * game->engine->time->deltaTime;
+
+    if (tc->position.x > game->engine->GfxEngine->windowWidth - 50)
+    {
+        movementComponent->velocity.x = -movementComponent->velocity.x;
+        tc->position.x = game->engine->GfxEngine->windowWidth - 50;
+    }
+    else if (tc->position.x < 50)
+    {
+        movementComponent->velocity.x = -movementComponent->velocity.x;
+        tc->position.x = 50;
+    }
+}
+
 void ParticleMovementBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    //printf("Enemy Behaviour Called\n");
     struct MovementComponent *movementComponent = selfComponent->data;
     struct TransformComponent *tc = GetComponentData(selfComponent->owner, TransformC);
 
@@ -12,7 +48,6 @@ void ParticleMovementBehaviour(struct Component *selfComponent, struct Game *gam
 
 void AutomatedMovementBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    //printf("Enemy Behaviour Called\n");
     struct MovementComponent *movementComponent = selfComponent->data;
     struct TransformComponent *tc = GetComponentData(selfComponent->owner, TransformC);
 
@@ -23,7 +58,6 @@ void AutomatedMovementBehaviour(struct Component *selfComponent, struct Game *ga
         (tc->position.y < -100 && movementComponent->velocity.y < 0))
     {
         SetEntityActiveStatus(selfComponent->owner, false);
-        //printf("DISATTIVATA ENTITY NUMERO %d ALLE COORDINATE:    %f  |  %f", selfComponent->owner->__entityIndex, tc->position.x, tc->position.y);
     }
 }
 
@@ -41,7 +75,6 @@ void WaterMovementBehaviour(struct Component *selfComponent, struct Game *game)
 
 void PlayerMovementBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    //printf("PlayerMovement Behaviour Called\n");
     struct MovementComponent *movementComponent = selfComponent->data;
     struct InputComponent *ic = GetComponentData(selfComponent->owner, InputC);
     struct TransformComponent *tc = GetComponentData(selfComponent->owner, TransformC);
@@ -67,5 +100,4 @@ void InitMovementComponent(struct MovementComponent *movementComponent, vec2 vel
 {
     movementComponent->velocity = velocity;
     movementComponent->speed = speed;
-    printf("\n---Movement Component Initialized!");
 }

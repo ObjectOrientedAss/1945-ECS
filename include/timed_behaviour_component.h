@@ -23,6 +23,9 @@ void DetachAttackPowerupBehaviour(struct Component *selfComponent, struct Game *
 void DetachSpeedPowerupBehaviour(struct Component *selfComponent, struct Game *game);
 void SpawnPowerupBehaviour(struct Component *selfComponent, struct Game *game);
 void SpawnIslandBehaviour(struct Component *selfComponent, struct Game *game);
+void SpawnBossBehaviour(struct Component *selfComponent, struct Game *game);
+void BossSwitchShootBehaviour(struct Component *selfComponent, struct Game *game);
+void BossExplosionBehaviour(struct Component *selfComponent, struct Game *game);
 void SpawnEnemyBehaviour(struct Component *selfComponent, struct Game *game);
 void SpawnEnemySquadronBehaviour(struct Component *selfComponent, struct Game *game);
 void ToggleEntityAfterBehaviour(struct Component *selfComponent, struct Game *game);

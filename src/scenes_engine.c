@@ -22,7 +22,6 @@ void DestroyScenesEngine(struct ScenesEngine *engine)
 void LoadScene(struct ScenesEngine *engine, struct Game *game, SceneType type)
 {
     struct Scene *scene = aiv_vector_at(engine->scenes, (int)type);
-    printf("\nLoading scene %d", scene->type);
     if (scene != NULL)
     {
         scene->Load(game);

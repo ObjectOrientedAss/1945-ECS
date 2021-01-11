@@ -91,7 +91,7 @@ void SpawnEnemyBehaviour(struct Component *selfComponent, struct Game *game)
         Enqueue(game->engine->poolsEngine, enemy);
 
         struct BattleLevelData *bld = game->levelData;
-        tbc->time = bld->islandSpawnTimer + GetRandomFloatBetween(bld->enemySpawnTimerChanger, -bld->enemySpawnTimerChanger);
+        tbc->time = bld->enemySpawnTimer + GetRandomFloatBetween(bld->enemySpawnTimerChanger, -bld->enemySpawnTimerChanger);
 
         //if the ondulation behaviour was active, turn it off
         struct Component *ondulationBehaviour = GetComponent(enemy, TimedBehaviourC);
@@ -149,6 +149,49 @@ void ReleaseSmokeBehaviour(struct Component *selfComponent, struct Game *game)
     }
 }
 
+void SpawnBossBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    struct TimedBehaviourComponent *tbc = selfComponent->data;
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
+    {
+        tbc->elapsedTime = 0;
+        struct BattleLevelData *bld = game->levelData;
+        SetEntityActiveStatus(bld->boss, true);
+        bld->enemySpawnTimer = 25.0f;
+        bld->enemyOndulationChance = -1;
+        bld->maxEnemySquadronSize = 3;
+        bld->squadronSpawnTimer = 25.0f;
+        MarkComponentToDestroy(selfComponent);
+    }
+}
+
+void BossSwitchShootBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    struct TimedBehaviourComponent *tbc = selfComponent->data;
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
+    {
+        tbc->elapsedTime = 0;
+        struct BattleLevelData *bld = game->levelData;
+        struct Component *mc = GetComponent(selfComponent->owner, ShootC);
+        if (mc->behaviour == BossDoubleShootBehaviour)
+        {
+            mc->behaviour = BossTripleShootBehaviour;
+            struct ShootComponent *sc = mc->data;
+            sc->shootCooldown = bld->bossTripleShootInterval;
+            tbc->time = bld->bossTripleShootSwitch;
+        }
+        else if (mc->behaviour == BossTripleShootBehaviour)
+        {
+            mc->behaviour = BossDoubleShootBehaviour;
+            struct ShootComponent *sc = mc->data;
+            sc->shootCooldown = bld->bossDoubleShootInterval;
+            tbc->time = bld->bossDoubleShootSwitch;
+        }
+    }
+}
+
 void SpawnEnemySquadronBehaviour(struct Component *selfComponent, struct Game *game)
 {
     struct TimedBehaviourComponent *tbc = selfComponent->data;
@@ -186,6 +229,58 @@ void SpawnEnemySquadronBehaviour(struct Component *selfComponent, struct Game *g
             if (x + 45 >= 625 || x - 45 <= 15)
                 xDirection = -xDirection;
             x += 45 * xDirection;
+        }
+        tbc->time = bld->squadronSpawnTimer;
+    }
+}
+
+void BossExplosionBehaviour(struct Component *selfComponent, struct Game *game)
+{
+    struct TimedBehaviourComponent *tbc = selfComponent->data;
+    tbc->elapsedTime += game->engine->time->deltaTimeInSeconds;
+    if (tbc->elapsedTime >= tbc->time)
+    {
+        tbc->elapsedTime = 0;
+        tbc->currentRepetitions++;
+
+        //make an explosion sound every 2 particles spawned
+        if (tbc->currentRepetitions % 2 == 0)
+        {
+            struct Entity *audioEmitter = Dequeue(game->engine->poolsEngine, AudioEmitter);
+            struct Component *c = GetComponent(audioEmitter, AudioC);
+            struct AudioComponent *audioComponent = c->data;
+            struct TimedBehaviourComponent *tbc = GetComponentData(audioEmitter, TimedBehaviourC);
+            tbc->time = 1.2f;
+            audioComponent->SetAudio(c, Explosion2SFX, 0);
+            SetEntityActiveStatus(audioEmitter, true);
+            Enqueue(game->engine->poolsEngine, audioEmitter);
+            audioComponent->PlayAudio(c, game);
+        }
+
+        struct TransformComponent *transformComponent = GetComponentData(selfComponent->owner, TransformC);
+
+        struct Entity *particle = Dequeue(game->engine->poolsEngine, ExplosionParticle);
+        struct TransformComponent *particleTransformComponent = GetComponentData(particle, TransformC);
+        float randomX = GetRandomFloatBetween(-50.0f, 50.0f);
+        float randomY = GetRandomFloatBetween(-50.0f, 50.0f);
+        particleTransformComponent->position = vec2_new(transformComponent->position.x + randomX, transformComponent->position.y + randomY);
+        SetEntityActiveStatus(particle, true);
+        Enqueue(game->engine->poolsEngine, particle);
+
+        if (tbc->currentRepetitions == tbc->repetitions)
+        {
+            struct BattleLevelData *bld = game->levelData;
+
+            //increase score
+            bld->score += 500;
+            sprintf(bld->scoreToString, "%d", bld->score);
+            bld->scoreUI->text = bld->scoreToString;
+
+            struct Component *c = AddComponent(bld->player, TimedBehaviourC, GoToMainMenuAfter);
+            InitTimedBehaviourComponent(c->data, 1, 3.0f, NULL);
+            c = GetComponent(selfComponent->owner, RenderC);
+            SetComponentActiveStatus(c, false);
+            MarkComponentToDestroy(selfComponent);
         }
     }
 }
@@ -314,5 +409,4 @@ void InitTimedBehaviourComponent(struct TimedBehaviourComponent *timedBehaviourC
     timedBehaviourComponent->time = time;
     timedBehaviourComponent->elapsedTime = 0;
     timedBehaviourComponent->customArgs = customArgs;
-    printf("\n---Timed Behaviour Component Initialized!");
 }

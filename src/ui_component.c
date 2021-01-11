@@ -6,7 +6,6 @@ void InitUIComponent(struct Component *selfComponent, void (*OnClick)(struct Com
     buttonComponent->OnClick = OnClick;
     buttonComponent->OnHoverStart = OnHoverStart;
     buttonComponent->OnHoverEnd = OnHoverEnd;
-    printf("\n---Button Component Initialized!");
 }
 
 void UIBehaviour(struct Component *selfComponent, struct Game *game)
@@ -22,7 +21,6 @@ void UIBehaviour(struct Component *selfComponent, struct Game *game)
         game->mousePositionY >= tc->position.y - (renderComponent->sprite.spriteRect.h * 0.5f) &&
         game->mousePositionY <= tc->position.y + (renderComponent->sprite.spriteRect.h * 0.5f))
     {
-        //printf("Mouse is over the button!!!!!!!!!");
         //if it is the first frame in which the mouse has started hovering
         if (!uiComponent->isHovering)
         {
@@ -49,7 +47,6 @@ void UIBehaviour(struct Component *selfComponent, struct Game *game)
 
 void ButtonHoverStart(struct Component *selfComponent)
 {
-    printf("Hovering on button started");
     struct RenderComponent *rc = GetComponentData(selfComponent->owner, RenderC);
     rc->sprite.spriteRect.w += 10;
     rc->sprite.spriteRect.h += 10;
@@ -58,7 +55,6 @@ void ButtonHoverStart(struct Component *selfComponent)
 //
 void ButtonHoverEnd(struct Component *selfComponent)
 {
-    printf("Hovering on button ended");
     struct RenderComponent *rc = GetComponentData(selfComponent->owner, RenderC);
     rc->sprite.spriteRect.w -= 10;
     rc->sprite.spriteRect.h -= 10;
@@ -67,13 +63,11 @@ void ButtonHoverEnd(struct Component *selfComponent)
 //the start button click event in the main menu
 void StartGameClick(struct Component *selfComponent, struct Game *game)
 {
-    printf("Clicking on Start Game");
     game->sceneToLoad = GameScene;
 }
 
 //the quit button click event in the main menu
 void QuitGameClick(struct Component *selfComponent, struct Game *game)
 {
-    printf("Clicking on Quit Game");
     game->quitRequest = true;
 }

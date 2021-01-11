@@ -23,5 +23,6 @@ void HealthBehaviour(struct Component *selfComponent, struct Game* game);
 void ChangeHealth(struct HealthComponent *selfComponent, float amount);
 void PlayerDeath(struct Component* selfComponent, struct Game* game);
 void EnemyDeath(struct Component* selfComponent, struct Game* game);
+void BossDeath(struct Component* selfComponent, struct Game* game);
 
 #endif //HEALTH_COMPONENT_H

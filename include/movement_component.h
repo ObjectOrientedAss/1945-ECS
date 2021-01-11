@@ -14,6 +14,8 @@ struct MovementComponent
 void InitMovementComponent(struct MovementComponent* movementComponent, vec2 velocity, float speed);
 
 //UPDATE
+void BossEntranceMovementBehaviour(struct Component *selfComponent, struct Game *game);
+void BossFightMovementBehaviour(struct Component *selfComponent, struct Game *game);
 void ParticleMovementBehaviour(struct Component *selfComponent, struct Game *game);
 void WaterMovementBehaviour(struct Component* selfComponent, struct Game* game);
 void PlayerMovementBehaviour(struct Component *selfComponent, struct Game* game);

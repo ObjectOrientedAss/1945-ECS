@@ -95,14 +95,12 @@ struct Sprite *CreateSprite(char *path, SpriteType type, SDL_Renderer *renderer)
     int h = 0;
     int w = 0;
     SDL_QueryTexture(sprite->texture, NULL, NULL, &h, &w);
-    //printf("%d - %d\n", h, w);
 
     originRect.w = h;
     originRect.h = w;
     originRect.x = 0;
     originRect.y = 0;
 
-    //printf("Creating SpriteType: %d | Texture W: %d | Texture H: %d\n", (int)type, sprite->originRect->w, sprite->originRect->h);
     spriteRect.w = originRect.w;
     spriteRect.h = originRect.h;
     spriteRect.x = 0;
@@ -110,9 +108,6 @@ struct Sprite *CreateSprite(char *path, SpriteType type, SDL_Renderer *renderer)
 
     sprite->originRect = originRect;
     sprite->spriteRect = spriteRect;
-    // printf("\n\nOR H: %d | OR W: %d | OR X: %d | OR Y: %d", sprite->originRect.h, sprite->originRect.w, sprite->originRect.x, sprite->originRect.y);
-    // printf("\n\nSR H: %d | SR W: %d | SR X: %d | SR Y: %d", sprite->spriteRect.h, sprite->spriteRect.w, sprite->spriteRect.x, sprite->spriteRect.y);
-    // printf("\n\nSPRITE TEXTURE %llu", sprite->texture);
 
     return sprite;
 }
@@ -166,7 +161,6 @@ struct SpriteSheet *CreateSpriteSheet(char *path, int frames, float baseFrameDur
     int spriteSheetW;
     SDL_QueryTexture(spriteSheet->texture, NULL, NULL, &spriteSheetW, &spriteSheet->frameHeight);
     spriteSheet->frameWidth = spriteSheetW / spriteSheet->frames;
-    printf("Frames: %d, frameWidth: %d", spriteSheet->frames, spriteSheet->frameWidth);
     return spriteSheet;
 }
 
@@ -192,6 +186,8 @@ void LoadSpriteSheets(struct GFXEngine *engine)
     spriteSheet = CreateSpriteSheet("resources/assets/player/explosion2_strip7.png", 7, 0.1f, PlayerExplosionA, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
     spriteSheet = CreateSpriteSheet("resources/assets/player/smoke_strip10.png", 10, 0.2f, SmokeA, engine->renderer);
+    aiv_vector_add(engine->spriteSheets, spriteSheet);
+    spriteSheet = CreateSpriteSheet("resources/assets/enemy/boss.png", 3, 0.3f, BossA, engine->renderer);
     aiv_vector_add(engine->spriteSheets, spriteSheet);
 }
 

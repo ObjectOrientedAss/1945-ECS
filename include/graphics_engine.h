@@ -21,7 +21,8 @@ enum a_type
     EnemyExplosionA,
     PlayerA,
     PlayerExplosionA,
-    SmokeA
+    SmokeA,
+    BossA
 };
 typedef enum a_type AnimationType;
 

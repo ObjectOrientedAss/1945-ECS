@@ -1,80 +1,5 @@
 #include "game.h"
 
-//DEFINE THE BASIC COMPONENTS FOR EACH ENTITY AND THEIR SYSTEM BEHAVIOUR
-void AddComponents(struct Entity *entity)
-{
-    switch (entity->type)
-    {
-    case Airplane:
-        AddComponent(entity, TransformC, NULL);
-        if (entity->family == PlayerAirplane)
-        {
-            AddComponent(entity, TimedBehaviourC, ReleaseSmokeBehaviour);
-            AddComponent(entity, InputC, InputBehaviour);
-            AddComponent(entity, MovementC, PlayerMovementBehaviour);
-            AddComponent(entity, ShootC, PlayerShootBehaviour);
-        }
-        else
-        {
-            AddComponent(entity, TimedBehaviourC, OndulationBehaviour);
-            AddComponent(entity, MovementC, AutomatedMovementBehaviour);
-            AddComponent(entity, ShootC, EnemyShootBehaviour);
-        }
-        AddComponent(entity, PhysicsC, PhysicsBehaviour);
-        AddComponent(entity, HealthC, HealthBehaviour);
-        AddComponent(entity, AnimatorC, AnimatorBehaviour);
-        AddComponent(entity, RenderC, RenderBehaviour);
-        break;
-
-    case Bullet:
-        AddComponent(entity, TransformC, NULL);
-        AddComponent(entity, MovementC, AutomatedMovementBehaviour);
-        AddComponent(entity, PhysicsC, PhysicsBehaviour);
-        AddComponent(entity, RenderC, RenderBehaviour);
-        break;
-
-    case UI:
-        switch (entity->family)
-        {
-        case Button:
-            AddComponent(entity, TransformC, NULL);
-            AddComponent(entity, UIC, UIBehaviour);
-            AddComponent(entity, RenderC, RenderBehaviour);
-            break;
-        case Text:
-            AddComponent(entity, TransformC, NULL);
-            AddComponent(entity, TextC, NULL);
-            AddComponent(entity, RenderC, FontRenderBehaviour);
-            break;
-        case Image:
-            AddComponent(entity, TransformC, NULL);
-            AddComponent(entity, RenderC, RenderBehaviour);
-            break;
-        }
-        break;
-
-    case Particle:
-        AddComponent(entity, TransformC, NULL);
-        AddComponent(entity, TimedBehaviourC, ToggleEntityAfterBehaviour);
-        AddComponent(entity, MovementC, ParticleMovementBehaviour);
-        AddComponent(entity, AnimatorC, AnimatorBehaviour);
-        AddComponent(entity, RenderC, RenderBehaviour);
-        break;
-
-    case Audio:
-        AddComponent(entity, AudioC, NULL);
-        AddComponent(entity, TimedBehaviourC, ToggleEntityAfterBehaviour);
-        break;
-
-    case Powerup:
-        AddComponent(entity, TransformC, NULL);
-        AddComponent(entity, MovementC, AutomatedMovementBehaviour);
-        AddComponent(entity, PhysicsC, PhysicsBehaviour);
-        AddComponent(entity, RenderC, RenderBehaviour);
-        break;
-    }
-}
-
 int GetRandomInt(int max)
 {
     return rand() % max;
@@ -201,7 +126,6 @@ void UpdateECS(struct Game *game)
             }
         }
     }
-    //printf("Ancora non me so spaccato");
     SDL_RenderPresent(game->engine->GfxEngine->renderer);
     DestroyComponents(game->ECS->componentsToDestroy);
     DestroyEntities(game->ECS->entitiesToDestroy);

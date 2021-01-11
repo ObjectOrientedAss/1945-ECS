@@ -11,6 +11,7 @@ struct MainMenuLevelData
 struct BattleLevelData
 {
     struct Entity* player;      //reference to the player entity
+    struct Entity* boss;        //reference to the boss entity
     struct TextComponent* scoreUI;     //reference to the score UI text component
     struct TextComponent* powerupUI;     //reference to the score UI text component
     aiv_vector* lives;          //reference to the lives entity in the ui
@@ -51,6 +52,16 @@ struct BattleLevelData
     int speedPowerupBonus;
     int attackPowerupBonus;
     float playerSuicideDamage;
+
+    double bossSpawnTimer;
+    double bossTripleShootInterval;
+    double bossDoubleShootInterval;
+    double bossDoubleShootSwitch;
+    double bossTripleShootSwitch;
+    float bossHealth;
+    float bossBulletsSpeed;
+    float bossBulletsDamage;
+    float bossSpeed;
 
     char scoreToString[5];
 };

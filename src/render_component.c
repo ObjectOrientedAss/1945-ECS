@@ -2,7 +2,6 @@
 
 void RenderBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    //printf("Render Behaviour Called\n");
     struct RenderComponent *renderComponent = selfComponent->data;
 
     struct TransformComponent *tc = GetComponentData(selfComponent->owner, TransformC);
@@ -28,8 +27,4 @@ void InitRenderComponent(struct RenderComponent *renderComponent, struct GFXEngi
 {
     renderComponent->renderer = engine->renderer;
     renderComponent->sprite = GetSprite(engine, spriteType);
-    // printf("\n\n-------------------------------------------------\n\n");
-    // printf("\n\nOR H: %d | OR W: %d | OR X: %d | OR Y: %d", renderComponent->sprite.originRect.h, renderComponent->sprite.originRect.w, renderComponent->sprite.originRect.x, renderComponent->sprite.originRect.y);
-    // printf("\n\nSR H: %d | SR W: %d | SR X: %d | SR Y: %d", renderComponent->sprite.spriteRect.h, renderComponent->sprite.spriteRect.w, renderComponent->sprite.spriteRect.x, renderComponent->sprite.spriteRect.y);
-    printf("\n---Render Component Initialized!");
 }

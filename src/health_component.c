@@ -2,26 +2,22 @@
 
 void HealthBehaviour(struct Component *selfComponent, struct Game *game)
 {
-    //printf("Health Behaviour Called\n");
     //get my health component
     struct HealthComponent *healthComponent = selfComponent->data;
     if (healthComponent->currentHealth <= 0)
     {
-        printf("\nHealth <= 0, DIE!");
         healthComponent->Die(selfComponent, game);
     }
 }
 
 void PlayerDeath(struct Component *selfComponent, struct Game *game)
 {
-    //the component arriving here is a healthcomponent
     selfComponent->active = false;
     struct HealthComponent *healthComponent = selfComponent->data;
     healthComponent->currentLives--;
     struct BattleLevelData *bld = game->levelData;
     struct Entity *lifeUI = aiv_vector_at(bld->lives, healthComponent->currentLives);
     SetEntityActiveStatus(lifeUI, false);
-    printf("\nLife lost. Current Lives: %d", healthComponent->currentLives);
     if (healthComponent->currentLives <= 0) //final life spent, goodbye my friend.
     {
         struct Component *rc = GetComponent(selfComponent->owner, RenderC);
@@ -108,7 +104,6 @@ void EnemyDeath(struct Component *selfComponent, struct Game *game)
     //increase score
     struct BattleLevelData *bld = game->levelData;
     bld->score++;
-    sprintf(bld->scoreToString, "%d", bld->score);
     bld->scoreUI->text = bld->scoreToString;
 
     //spawn life power up, if you're lucky
@@ -125,13 +120,34 @@ void EnemyDeath(struct Component *selfComponent, struct Game *game)
     SetEntityActiveStatus(selfComponent->owner, false);
 }
 
+void BossDeath(struct Component *selfComponent, struct Game *game)
+{
+    //the component arriving here is a healthcomponent
+    selfComponent->active = false;
+    struct HealthComponent *healthComponent = selfComponent->data;
+    struct BattleLevelData *bld = game->levelData;
+
+    struct Component* c = GetComponent(selfComponent->owner, PhysicsC);
+    SetComponentActiveStatus(c, false);
+
+    c = GetComponent(selfComponent->owner, ShootC);
+    SetComponentActiveStatus(c, false);
+
+    struct TransformComponent *transformComponent = GetComponentData(selfComponent->owner, TransformC);
+    struct MovementComponent *movementComponent = GetComponentData(selfComponent->owner, MovementC);
+    movementComponent->velocity = vec2_new(0, 1);
+    movementComponent->speed = 0.05f;
+
+    c = AddComponent(selfComponent->owner, TimedBehaviourC, BossExplosionBehaviour);
+    InitTimedBehaviourComponent(c->data, 26, 0.2f, NULL);
+}
+
 void ChangeHealth(struct HealthComponent *selfComponent, float amount)
 {
     selfComponent->currentHealth += amount;
     if (selfComponent->currentHealth > selfComponent->maxHealth)
         selfComponent->currentHealth = selfComponent->maxHealth;
 }
-
 
 void InitHealthComponent(struct HealthComponent *healthComponent, int maxLives, int startingLives, float maxHealth, float startingHealth, void (*ChangeHealth)(struct HealthComponent *selfComponent, float amount), void (*Die)(struct Component *selfComponent, struct Game *game))
 {
@@ -141,6 +157,4 @@ void InitHealthComponent(struct HealthComponent *healthComponent, int maxLives, 
     healthComponent->Die = Die;
     healthComponent->maxLives = maxLives;
     healthComponent->currentLives = startingLives;
-
-    printf("\n---Health Component Initialized!");
 }

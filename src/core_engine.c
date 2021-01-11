@@ -24,8 +24,6 @@ struct Engine *StartEngine()
     if (engine->time == NULL)
         return NULL;
 
-    //printf("Engine initialized correctly");
-
     return engine;
 }
 
