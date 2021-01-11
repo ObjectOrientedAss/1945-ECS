@@ -3,7 +3,7 @@
 
 #include "SDL.h"
 
-typedef struct
+struct Time
 {
     double _frequency;
     int _currentCount;
@@ -11,9 +11,9 @@ typedef struct
     double deltaTime;
     double deltaTimeInSeconds;
     int fps;
-} Time;
+};
 
-Time* TimeInit();
-void TimeUpdate(Time*);
+struct Time* TimeInit();
+void TimeUpdate(struct Time*);
 
 #endif //TIME_H

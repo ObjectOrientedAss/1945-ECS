@@ -3,15 +3,15 @@
 
 #include <stdlib.h>
 #include "time.h"
-#include "graphics_engine.h"
+#include "ecs.h"
 #include "scenes_engine.h"
+#include "graphics_engine.h"
 #include "pools_engine.h"
 #include "audio_engine.h"
-#include "ecs.h"
 
 struct Engine
 {
-    Time* time;
+    struct Time* time;
     struct GFXEngine* GfxEngine;
     struct ScenesEngine* scenesEngine;
     struct PoolsEngine* poolsEngine;

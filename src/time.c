@@ -1,14 +1,14 @@
 #include "time.h"
 
-Time *TimeInit()
+struct Time *TimeInit()
 {
-    Time* t = calloc(1, sizeof(Time));
+    struct Time* t = calloc(1, sizeof(struct Time));
     t->_currentCount = SDL_GetPerformanceCounter();
     t->_lastCount = t->_currentCount;
     return t;
 }
 
-void TimeUpdate(Time *time)
+void TimeUpdate(struct Time *time)
 {
     time->_lastCount = time->_currentCount;
     time->_currentCount = SDL_GetPerformanceCounter();

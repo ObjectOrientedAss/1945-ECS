@@ -1064,6 +1064,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\src\pools_engine.c" />
     <ClCompile Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\src\queue.c" />
     <ClCompile Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\src\render_component.c" />
+    <ClCompile Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\src\scene.c" />
     <ClCompile Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\src\scenes_engine.c" />
     <ClCompile Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\src\sdl_font_cache.c" />
     <ClCompile Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\src\shoot_component.c" />
@@ -1079,6 +1080,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\audio_engine.h" />
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\color.h" />
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\common.h" />
+    <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\component.h" />
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\core_engine.h" />
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\ecs.h" />
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\entity.h" />
@@ -1091,6 +1093,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\pools_engine.h" />
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\queue.h" />
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\render_component.h" />
+    <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\scene.h" />
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\scenes_engine.h" />
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\sdl_font_cache.h" />
     <ClInclude Include="C:\Users\Danno Critico\Desktop\AIV-Terzo-Anno\1945-ECS\sdl-blank-prj\include\shoot_component.h" />
