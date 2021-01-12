@@ -14,6 +14,12 @@
 # EXTERNAL cache entries
 ########################
 
+//Value Computed by CMake
+1945_BINARY_DIR:STATIC=C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj/build
+
+//Value Computed by CMake
+1945_SOURCE_DIR:STATIC=C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj
+
 //Path to a program.
 CMAKE_AR:FILEPATH=C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/lib.exe
 
@@ -95,7 +101,7 @@ CMAKE_INSTALL_MANDIR:PATH=
 CMAKE_INSTALL_OLDINCLUDEDIR:PATH=/usr/include
 
 //Install path prefix, prepended onto install directories.
-CMAKE_INSTALL_PREFIX:PATH=C:/Program Files/SDLWindowPrj
+CMAKE_INSTALL_PREFIX:PATH=C:/Program Files/1945
 
 //Run-time variable data (LOCALSTATEDIR/run)
 CMAKE_INSTALL_RUNSTATEDIR:PATH=
@@ -145,7 +151,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=SDLWindowPrj
+CMAKE_PROJECT_NAME:STATIC=1945
 
 //RC compiler
 CMAKE_RC_COMPILER:FILEPATH=C:/Program Files (x86)/Windows Kits/10/bin/10.0.18362.0/x64/rc.exe
@@ -259,12 +265,6 @@ SDL2_PATH:STRING=c:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blan
 
 //No help, variable specified on the command line.
 SDL2_TTF_PATH:STRING=c:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj/cmake/sdl2_ttf/
-
-//Value Computed by CMake
-SDLWindowPrj_BINARY_DIR:STATIC=C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj/build
-
-//Value Computed by CMake
-SDLWindowPrj_SOURCE_DIR:STATIC=C:/Users/Danno Critico/Desktop/AIV-Terzo-Anno/1945-ECS/sdl-blank-prj
 
 
 ########################
@@ -436,5 +436,5 @@ SDL2_MIXER_INCLUDE_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: SDL2_MIXER_LIBRARY
 SDL2_MIXER_LIBRARY-ADVANCED:INTERNAL=1
 //CMAKE_INSTALL_PREFIX during last run
-_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=C:/Program Files/SDLWindowPrj
+_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=C:/Program Files/1945
 

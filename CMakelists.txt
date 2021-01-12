@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 
 
-project(SDLWindowPrj LANGUAGES C)
+project(1945 LANGUAGES C)
 
 #[[
   CMAKE_MODULE_PATH da usare quando cerco librerie di tipo MODULO (ovvero Find*.cmake)
@@ -43,18 +43,18 @@ foreach (_variableName ${_variableNames})
 endforeach()
 ]] 
 
-file(GLOB SOURCES "src/*.c")
-file(GLOB HEADERS "include/*.h")
+file(GLOB SOURCES "src/*.c" "src/components/*.c" "src/engine/*.c" "src/utils/*.c" "src/scenes/*.c" "src/game/*.c")
+file(GLOB HEADERS "include/*.h" "include/components/*.h" "include/engine/*.h" "include/utils/*.h" "include/scenes/*.h" "include/entities/*.h" "include/game/*.h")
 
-add_executable(SDLWindowPrj ${SOURCES} ${HEADERS})
+add_executable(1945 ${SOURCES} ${HEADERS})
 # link diretto sulla .lib
-target_link_libraries(SDLWindowPrj 
+target_link_libraries(1945 
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARY}
   ${SDL2TTF_LIBRARY}
   ${SDL2_MIXER_LIBRARY}
 ) 
-target_include_directories(SDLWindowPrj 
+target_include_directories(1945 
   PRIVATE 
     ${SDL2_INCLUDE_DIR}
     ${SDL2_IMAGE_INCLUDE_DIR} 
@@ -62,6 +62,11 @@ target_include_directories(SDLWindowPrj
     ${SDL2_MIXER_INCLUDE_DIR}  
     include
     include/components
+    include/engine
+    include/utils
+    include/scenes
+    include/entities
+    include/game
 )
 
 #Per Windows: il file .exe ha bisogno della .dll vicino a se.
@@ -76,8 +81,8 @@ if(WIN32)
     set(DLL_LIST "${SDL2_DLL}" "${SDL2IMAGE_DLLS}" "${SDL2ITTF_DLLS}" "${SDL2MIXER_DLLS}")
    
     foreach(EACH_DLL ${DLL_LIST})
-      add_custom_command(TARGET SDLWindowPrj POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${EACH_DLL} $<TARGET_FILE_DIR:SDLWindowPrj>
+      add_custom_command(TARGET 1945 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${EACH_DLL} $<TARGET_FILE_DIR:1945>
       )
     endforeach()
   
@@ -85,7 +90,7 @@ endif(WIN32)
 
 # Post build: Copy Resources to bin
 set(ResourcesPath ${CMAKE_CURRENT_SOURCE_DIR}/resources)
-add_custom_command(TARGET SDLWindowPrj POST_BUILD
+add_custom_command(TARGET 1945 POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan "Copy Resources..."
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${ResourcesPath} $<TARGET_FILE_DIR:SDLWindowPrj>/resources
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${ResourcesPath} $<TARGET_FILE_DIR:1945>/resources
     )
