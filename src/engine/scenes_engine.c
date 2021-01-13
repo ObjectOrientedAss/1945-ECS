@@ -1,6 +1,6 @@
 #include "scenes_engine.h"
 
-struct ScenesEngine *__StartScenesEngine()
+struct ScenesEngine *__ScenesEngineInit()
 {
     struct ScenesEngine *scenesEngine = calloc(1, sizeof(struct ScenesEngine));
     scenesEngine->scenes = aiv_vector_new_with_cap(2);

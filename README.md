@@ -40,5 +40,62 @@ I have never developed an ECS before this project, and i only knew some general 
 
 ## User Guide
 
-Work in progress...
-> Rome Engine wasn't built in a day.
+### Before the game loop:
+
+Before entering the actual game loop, you should follow the next procedure:
+- Create all you game scenes to load them into the Scenes Engine.
+- Load the first scene of your game (like the splash screen or the main menu).
+
+Example of a pre game loop implementation:
+
+```
+void GameLoop(struct Game *game)
+{
+    //prepare all the game scenes
+    CreateScene(game->engine->scenesEngine, LoadSplashScreenScene, SplashScreenScene);
+    CreateScene(game->engine->scenesEngine, LoadMainMenuScene, MainMenuScene);
+    CreateScene(game->engine->scenesEngine, LoadGameScene, GameScene);
+    //load the first scene of the game
+    LoadScene(game->engine->scenesEngine, game, SplashScreenScene);
+    game->sceneToLoad = None;
+```
+
+### In the game loop:
+
+The main game loop is almost totally automated. You should follow the next procedures:
+- Update the main engine.
+- Update SDL to check if there are no errors or quit requests.
+- Update ECS to handle your core gameplay mechanics
+- If there is a pending change scene request:
+    * Reset the Engine's game-dependencies
+    * Deallocate the levelData
+    * Load the new scene
+```
+    //actual game loop
+    while (!game->quitRequest)
+    {
+        UpdateEngine(game->engine); //update the main engine stuff
+
+        if (!UpdateSDL(game)) //update sdl
+            break;
+
+        UpdateECS(game); //update the ECS
+
+        if (game->sceneToLoad != None) //if in this frame has been requested a scene change
+        {
+            Reset(game->engine);
+            free(game->levelData); //clear the scene data
+            LoadScene(game->engine->scenesEngine, game, game->sceneToLoad); //and load the requested scene
+            game->sceneToLoad = None;
+        }
+    }
+```
+
+### After the game loop:
+
+If the game loop breaks for any reason, you should follow the deallocation and free procedure to Quit the game.
+
+```
+    QuitGame(game); //shut down all the systems and close the game
+}
+```

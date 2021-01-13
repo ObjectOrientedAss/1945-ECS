@@ -94,7 +94,6 @@ void LoadSplashScreenScene(struct Game *game)
 
 void LoadMainMenuScene(struct Game *game)
 {
-    
     struct MainMenuLevelData *mmld = (struct MainMenuLevelData *)calloc(1, sizeof(struct MainMenuLevelData));
     game->levelData = mmld;
 
@@ -166,8 +165,8 @@ void LoadGameScene(struct Game *game)
     battleLevelData->bossBulletsDamage = 20.0f;
     battleLevelData->bossBulletsSpeed = 0.4f;
     battleLevelData->bossSpeed = 0.1f;
-    battleLevelData->bossHealth = 10000.0f;
-    battleLevelData->bossSpawnTimer = 60.0f;
+    battleLevelData->bossHealth = 1000.0f;
+    battleLevelData->bossSpawnTimer = 10.0f;
     battleLevelData->bossDoubleShootInterval = 0.5f;
     battleLevelData->bossTripleShootInterval = 0.3f;
     battleLevelData->bossDoubleShootSwitch = 5.0f;

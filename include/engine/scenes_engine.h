@@ -27,7 +27,7 @@ struct ScenesEngine
 };
 
 //allocate and start the scenes engine
-struct ScenesEngine *__StartScenesEngine();
+struct ScenesEngine *__ScenesEngineInit();
 //deallocate and stop all the scenes and the scenes engine
 void __DestroyScenesEngine(struct ScenesEngine *engine);
 //load the scene of the requested type

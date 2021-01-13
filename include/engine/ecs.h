@@ -24,7 +24,7 @@ struct EntityComponentSystem *__ECSInit();
 //stop and deallocate the ECS
 void __DestroyECS(struct EntityComponentSystem *ECS);
 //clear the ECS and make a fresh one, with all the structures clear and ready to start over. You should call it on every scene change.
-struct EntityComponentSystem* ECSReset(struct EntityComponentSystem* ECS);
+struct EntityComponentSystem* __ECSReset(struct EntityComponentSystem* ECS);
 //create an entity with the given informations
 struct Entity *CreateEntity(EntityType type, EntityFamily family, boolean activateImmediately, struct EntityComponentSystem *ECS);
 //add a component on the given entity with the given informations

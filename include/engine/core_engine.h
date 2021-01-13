@@ -1,6 +1,8 @@
 #ifndef CORE_ENGINE_H
 #define CORE_ENGINE_H
 
+#define SDL_MAIN_HANDLED //do not use SDL main.
+
 #include <stdlib.h>
 #include "time.h"
 #include "ecs.h"
@@ -21,7 +23,7 @@ struct Engine
 };
 
 //allocate and start the main engine and all the other engines
-struct Engine* StartEngine();
+struct Engine* CoreEngineInit();
 //update the engines main stuff (like time)
 void UpdateEngine(struct Engine* engine);
 //stop and deallocate all the engines and the stuff related

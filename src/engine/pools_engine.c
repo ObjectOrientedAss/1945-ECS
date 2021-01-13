@@ -1,6 +1,6 @@
 #include "pools_engine.h"
 
-struct PoolsEngine* __StartPoolsEngine()
+struct PoolsEngine* __PoolsEngineInit()
 {
     struct PoolsEngine* poolsEngine = (struct PoolsEngine*)calloc(1, sizeof(struct PoolsEngine));
     poolsEngine->pools = aiv_vector_new();
@@ -34,10 +34,10 @@ void __DestroyPoolsEngine(struct PoolsEngine* engine)
     free(engine);
 }
 
-struct PoolsEngine* PoolsReset(struct PoolsEngine* engine)
+struct PoolsEngine* __PoolsReset(struct PoolsEngine* engine)
 {
     __DestroyPoolsEngine(engine);
-    return __StartPoolsEngine();
+    return __PoolsEngineInit();
 }
 
 void Enqueue(struct PoolsEngine* engine, struct Entity* entity)

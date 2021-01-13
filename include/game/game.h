@@ -16,7 +16,7 @@ struct Game
 };
 
 //allocate the game and start the engines
-struct Game* StartGame();
+struct Game* InitGame();
 //deallocate and stop all the engines, free everything and quit the game
 void QuitGame(struct Game* game);
 //the main game loop frame update

@@ -5,9 +5,7 @@ struct Queue *createQueue()
 {
 	struct Queue *q = calloc(1, sizeof(struct Queue));
 	if (q == NULL)
-	{
 		return NULL;
-	}
 
 	q->size = 0;
 	q->head = q->tail = NULL;
@@ -94,17 +92,12 @@ size_t getSize(struct Queue *q)
 boolean isEmpty(struct Queue *q)
 {
 	if (q == NULL)
-	{
 		return true;
-	}
+
 	if (q->size == 0)
-	{
 		return true;
-	}
 	else
-	{
 		return false;
-	}
 }
 
 void destroyQueue(struct Queue *q)

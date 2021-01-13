@@ -1,11 +1,9 @@
-#define SDL_MAIN_HANDLED //do not use SDL main.
-
 #include "game.h"
 
 //ENTRY POINT
 int main()
 {
-    struct Game* game = StartGame();
+    struct Game* game = InitGame();
     GameLoop(game);
     return 0;
 }

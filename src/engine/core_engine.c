@@ -1,22 +1,22 @@
 #include "core_engine.h"
 
-struct Engine *StartEngine()
+struct Engine *CoreEngineInit()
 {
     struct Engine *engine = calloc(1, sizeof(struct Engine));
 
-    engine->scenesEngine = __StartScenesEngine();
+    engine->scenesEngine = __ScenesEngineInit();
     if (engine->scenesEngine == NULL)
         return NULL;
 
-    engine->GfxEngine = __StartGFXEngine();
+    engine->GfxEngine = __GFXEngineInit();
     if (engine->GfxEngine == NULL)
         return NULL;
 
-    engine->poolsEngine = __StartPoolsEngine();
+    engine->poolsEngine = __PoolsEngineInit();
     if (engine->poolsEngine == NULL)
         return NULL;
 
-    engine->audioEngine = __StartAudioEngine();
+    engine->audioEngine = __AudioEngineInit();
     if (engine->audioEngine == NULL)
         return NULL;
 
@@ -52,8 +52,8 @@ void StopEngine(struct Engine *engine)
 
 void Reset(struct Engine *engine)
 {
-    engine->ECS = ECSReset(engine->ECS);
-    engine->poolsEngine = PoolsReset(engine->poolsEngine);
+    engine->ECS = __ECSReset(engine->ECS);
+    engine->poolsEngine = __PoolsReset(engine->poolsEngine);
 }
 
 int GetRandomInt(int max)

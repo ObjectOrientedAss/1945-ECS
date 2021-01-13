@@ -83,7 +83,7 @@ struct GFXEngine
 };
 
 //start and allocate the graphics engine and all the gfx resources
-struct GFXEngine *__StartGFXEngine();
+struct GFXEngine *__GFXEngineInit();
 //stop and deallocate the graphics engine and all the gfx resources
 void __StopGFXEngine(struct GFXEngine* engine);
 //create a spritesheet of the requested type

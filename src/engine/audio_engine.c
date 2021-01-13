@@ -1,6 +1,6 @@
 #include "audio_engine.h"
 
-struct AudioEngine *__StartAudioEngine()
+struct AudioEngine *__AudioEngineInit()
 {
     //allocate the engine
     struct AudioEngine *engine = (struct AudioEngine *)calloc(1, sizeof(struct AudioEngine));

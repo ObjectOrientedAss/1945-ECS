@@ -1,10 +1,10 @@
 #include "game.h"
 
-struct Game *StartGame()
+struct Game *InitGame()
 {
     struct Game *game = (struct Game *)calloc(1, sizeof(struct Game));
 
-    game->engine = StartEngine();
+    game->engine = CoreEngineInit();
     if (game->engine == NULL)
         return NULL;
 
@@ -80,11 +80,11 @@ void UpdateECS(struct Game *game)
     struct Component *systemComponent;
 
     SDL_SetRenderDrawColor(game->engine->GfxEngine->renderer, 0, 0, 235, 0);
-    for (int i = 0; i < (int)c_type_last; i++)
+    for (int i = 0; i < c_type_last; i++)
     {
         currentSystem = aiv_vector_at(game->engine->ECS->__systems, i);
 
-        if (i == (int)c_type_last - 1) //RENDERING SYSTEM, IS THE LAST ONE!
+        if (i == c_type_last - 1) //RENDERING SYSTEM, IS THE LAST ONE!
             SDL_RenderClear(game->engine->GfxEngine->renderer);
 
         for (uint j = 0; j < aiv_vector_size(currentSystem); j++)

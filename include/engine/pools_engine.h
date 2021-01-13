@@ -11,7 +11,7 @@ struct PoolsEngine
 };
 
 //start and allocate the pools engine and the queues
-struct PoolsEngine*__StartPoolsEngine();
+struct PoolsEngine*__PoolsEngineInit();
 //create an empty pool for each entity family
 void __CreatePools(struct PoolsEngine* engine);
 //get the pool of the requested entity family
@@ -19,7 +19,7 @@ struct Queue* GetPool(struct PoolsEngine* engine, EntityFamily poolFamily);
 //stop and deallocate the pools engine and all the queues related
 void __DestroyPoolsEngine(struct PoolsEngine* engine);
 //destroy and recreate the pools engine and the queues. You should do it when you have to load a new scene after ECSreset.
-struct PoolsEngine* PoolsReset(struct PoolsEngine* engine);
+struct PoolsEngine* __PoolsReset(struct PoolsEngine* engine);
 //enqueue an entity in its pool
 void Enqueue(struct PoolsEngine* engine, struct Entity* entity);
 //dequeue an entity from its pool

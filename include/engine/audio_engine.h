@@ -37,7 +37,7 @@ struct AudioEngine
 };
 
 //allocate and start the audio engine
-struct AudioEngine* __StartAudioEngine();
+struct AudioEngine* __AudioEngineInit();
 //stop and deallocate the audio engine
 void __StopAudioEngine(struct AudioEngine* engine);
 //load all the game sounds to the audio engine

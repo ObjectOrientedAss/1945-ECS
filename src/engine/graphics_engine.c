@@ -1,6 +1,6 @@
 #include "graphics_engine.h"
 
-struct GFXEngine *__StartGFXEngine()
+struct GFXEngine *__GFXEngineInit()
 {
     struct GFXEngine *engine = calloc(1, sizeof(struct GFXEngine));
     SDL_Init(SDL_INIT_VIDEO);

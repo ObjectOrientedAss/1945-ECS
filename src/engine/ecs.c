@@ -18,7 +18,7 @@ struct EntityComponentSystem *__ECSInit()
     return ECS;
 }
 
-struct EntityComponentSystem *ECSReset(struct EntityComponentSystem *ECS)
+struct EntityComponentSystem *__ECSReset(struct EntityComponentSystem *ECS)
 {
     __DestroyECS(ECS);
     return __ECSInit();
@@ -57,7 +57,7 @@ struct Entity *CreateEntity(EntityType type, EntityFamily family, boolean activa
     return entity;
 }
 
-struct Component *AddComponent(struct Entity *entity, ComponentType componentType, void (*behaviour)(struct Component *selfComponent, struct Game *game), struct EntityComponentSystem* ECS)
+struct Component *AddComponent(struct Entity *entity, ComponentType componentType, void (*behaviour)(struct Component *selfComponent, struct Game *game), struct EntityComponentSystem *ECS)
 {
     struct Component *component = (struct Component *)calloc(1, sizeof(struct Component));
 
@@ -192,7 +192,7 @@ void *GetComponentData(struct Entity *entity, ComponentType type)
     return GetComponent(entity, type)->data;
 }
 
-void MarkComponentToDestroy(struct Component *component, struct EntityComponentSystem* ECS)
+void MarkComponentToDestroy(struct Component *component, struct EntityComponentSystem *ECS)
 {
     component->active = false;
     component->__markedToDestroy = true;
@@ -205,7 +205,7 @@ void MarkComponentToDestroy(struct Component *component, struct EntityComponentS
     aiv_vector_add(ECS->__componentsToDestroy, component);
 }
 
-void MarkEntityToDestroy(struct Entity *entity, struct EntityComponentSystem* ECS)
+void MarkEntityToDestroy(struct Entity *entity, struct EntityComponentSystem *ECS)
 {
     entity->active = false;
     entity->__markedToDestroy = true;
@@ -220,7 +220,7 @@ void MarkEntityToDestroy(struct Entity *entity, struct EntityComponentSystem* EC
     aiv_vector_add(ECS->__entitiesToDestroy, entity);
 }
 
-void __DestroyComponent(struct Component *component, struct EntityComponentSystem* ECS)
+void __DestroyComponent(struct Component *component, struct EntityComponentSystem *ECS)
 {
     //THIS IS TOTALLY UNOPTIMIZED! REMOVE ALL AT ONCE!
     __RemoveFromSystems(component, ECS);
@@ -230,7 +230,7 @@ void __DestroyComponent(struct Component *component, struct EntityComponentSyste
     free(component);
 }
 
-void __DestroyEntity(struct Entity *entity, struct EntityComponentSystem* ECS)
+void __DestroyEntity(struct Entity *entity, struct EntityComponentSystem *ECS)
 {
     __UnregisterEntity(entity, ECS);
     for (int i = aiv_vector_size(entity->__components) - 1; i >= 0; i--)
@@ -248,7 +248,7 @@ void Collect(struct EntityComponentSystem *ECS)
     __DestroyEntities(ECS->__entitiesToDestroy, ECS);
 }
 
-void __DestroyComponents(aiv_vector *componentsContainer, struct EntityComponentSystem* ECS)
+void __DestroyComponents(aiv_vector *componentsContainer, struct EntityComponentSystem *ECS)
 {
     for (int i = aiv_vector_size(componentsContainer) - 1; i >= 0; i--)
     {
@@ -257,7 +257,7 @@ void __DestroyComponents(aiv_vector *componentsContainer, struct EntityComponent
     }
 }
 
-void __DestroyEntities(aiv_vector *entitiesContainer, struct EntityComponentSystem* ECS)
+void __DestroyEntities(aiv_vector *entitiesContainer, struct EntityComponentSystem *ECS)
 {
     for (int i = aiv_vector_size(entitiesContainer) - 1; i >= 0; i--)
     {
@@ -266,7 +266,7 @@ void __DestroyEntities(aiv_vector *entitiesContainer, struct EntityComponentSyst
     }
 }
 
-void __AddToSystems(struct Component *component, struct EntityComponentSystem* ECS)
+void __AddToSystems(struct Component *component, struct EntityComponentSystem *ECS)
 {
     if (component->type >= 0) //if index is negative, it is not inside a system
     {
@@ -276,35 +276,35 @@ void __AddToSystems(struct Component *component, struct EntityComponentSystem* E
     }
 }
 
-void __RemoveFromSystems(struct Component *component, struct EntityComponentSystem* ECS)
-{
-    if (component->type >= 0) //if index is negative, it is not inside a system.
-    {
-        aiv_vector *system = aiv_vector_at(ECS->__systems, (uint)component->type);
-        aiv_vector_remove_at(system, component->__systemIndex);
-        for (uint i = component->__systemIndex; i < aiv_vector_size(system); i++)
-        {
-            struct Component *currComp = aiv_vector_at(system, i);
-            currComp->__systemIndex--;
-        }
-    }
-}
-
-void __RegisterEntity(struct Entity *entity, struct EntityComponentSystem* ECS)
+void __RegisterEntity(struct Entity *entity, struct EntityComponentSystem *ECS)
 {
     entity->__entityIndex = aiv_vector_size(ECS->__entities);
     aiv_vector_add(ECS->__entities, entity);
 }
 
-void __UnregisterEntity(struct Entity *entity, struct EntityComponentSystem* ECS)
+void __RemoveFromSystems(struct Component *component, struct EntityComponentSystem *ECS)
+{
+    if (component->type >= 0) //if index is negative, it is not inside a system.
+    {
+        aiv_vector *system = aiv_vector_at(ECS->__systems, component->type);
+        for (int i = aiv_vector_size(system) - 1; i > component->__systemIndex; i--)
+        {
+            struct Component *currComp = aiv_vector_at(system, i);
+            currComp->__systemIndex--;
+        }
+        aiv_vector_remove_at(system, component->__systemIndex);
+    }
+}
+
+void __UnregisterEntity(struct Entity *entity, struct EntityComponentSystem *ECS)
 {
     aiv_vector *entities = ECS->__entities;
-    aiv_vector_remove_at(entities, entity->__entityIndex);
-    for (uint i = entity->__entityIndex; i < aiv_vector_size(entities); i++)
+    for (int i = aiv_vector_size(entities) - 1; i > entity->__entityIndex; i--)
     {
         struct Entity *currEnt = aiv_vector_at(entities, i);
         currEnt->__entityIndex--;
     }
+    aiv_vector_remove_at(entities, entity->__entityIndex);
 }
 
 void SetEntityActiveStatus(struct Entity *entity, boolean active)
@@ -317,7 +317,7 @@ void SetComponentActiveStatus(struct Component *component, boolean active)
     component->active = active;
 }
 
-aiv_vector* GetSystem(struct EntityComponentSystem* ECS, ComponentType system)
+aiv_vector *GetSystem(struct EntityComponentSystem *ECS, ComponentType system)
 {
     return aiv_vector_at(ECS->__systems, system);
 }
